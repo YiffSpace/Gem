@@ -1,0 +1,1 @@
+OpenHash = YiffSpace::Utils::OpenHash

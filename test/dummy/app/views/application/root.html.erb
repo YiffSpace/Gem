@@ -1,0 +1,6 @@
+<% if auth.blank? %>
+  <%= link_to("Log In", yiff_space_auth_path) %>
+<% else %>
+  <%= link_to("Log Out", yiff_space_auth.logout_path) %><br>
+  <%= user.avatar.url %>
+<% end %>
