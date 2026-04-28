@@ -12,6 +12,14 @@ module YiffSpace
           define_method(attr) { |*, **| raise(NotImplementedError, "#{attr} is not present on anonymous user") }
         end
 
+        def username
+          "anonymous"
+        end
+
+        def display_name
+          "Anonymous"
+        end
+
         def anonymous?
           true
         end
