@@ -20,6 +20,22 @@ module YiffSpace
           "Anonymous"
         end
 
+        def avatar
+          nil
+        end
+
+        def avatar_url
+          nil
+        end
+
+        def banner
+          nil
+        end
+
+        def banner_url
+          nil
+        end
+
         def anonymous?
           true
         end
