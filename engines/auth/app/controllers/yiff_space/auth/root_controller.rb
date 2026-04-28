@@ -10,9 +10,9 @@ module YiffSpace
       end
 
       def cb
-        return render("error", locals: { message: "missing code in request" }, status: :bad_request) if params[:code].blank?
-        return render("error", locals: { message: "missing state in request" }, status: :bad_request) if params[:state].blank?
-        return render("error", locals: { message: "invalid state in request" }, status: :bad_request) if params[:state] != session[YiffSpace.config.auth.state_session_key]
+        return render("yiff_space/error", locals: { message: "missing code in request" }, status: :bad_request) if params[:code].blank?
+        return render("yiff_space/error", locals: { message: "missing state in request" }, status: :bad_request) if params[:state].blank?
+        return render("yiff_space/error", locals: { message: "invalid state in request" }, status: :bad_request) if params[:state] != session[YiffSpace.config.auth.state_session_key]
 
         helpers.reset_state!
         exchange     = Auth.exchange(params[:code])
@@ -29,6 +29,9 @@ module YiffSpace
         end
 
         redirect_to(path || "/")
+      end
+
+      def permissions
       end
 
       def logout
