@@ -18,13 +18,13 @@ body {
     background-color: #2C2F33;
     color: #FFFDD0;
     font-size: 2rem;
+}
 
-    div#page {
-        text-align: center;
+body div#page {
+    text-align: center;
 
-        ul.permissions-list {
-            display: inline-block;
-            text-align: left;
-        }
+    ul.permissions-list {
+        display: inline-block;
+        text-align: left;
     }
 }

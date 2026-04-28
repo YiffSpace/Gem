@@ -23,6 +23,7 @@ module YiffSpace
 
       initializer("yiff_space.auth.asset_paths") do |app|
         app.config.assets.paths << "#{shared_assets}/config"
+        app.config.assets.precompile += %w[yiff_space/application.css]
       end
     end
   end
