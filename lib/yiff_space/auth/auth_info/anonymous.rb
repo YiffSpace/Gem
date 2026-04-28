@@ -8,8 +8,24 @@ module YiffSpace
       class Anonymous
         include(::Singleton)
 
-        %i[id token entitlements roles permissions has_permission?].each do |attr|
-          define_method(attr) { |*, **| raise(NotImplementedError, "not present on anonymous auth") }
+        %i[id token].each do |attr|
+          define_method(attr) { |*, **| raise(NotImplementedError, "#{attr} is not present on anonymous auth") }
+        end
+
+        def entitlements
+          []
+        end
+
+        def roles
+          []
+        end
+
+        def permissions
+          Permissions.new([])
+        end
+
+        def has_permission?(*)
+          false
         end
 
         def anonymous?

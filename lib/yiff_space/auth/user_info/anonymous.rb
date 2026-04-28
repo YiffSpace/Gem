@@ -9,7 +9,7 @@ module YiffSpace
         include(::Singleton)
 
         %i[id user discord avatar].each do |attr|
-          define_method(attr) { |*, **| raise(NotImplementedError, "not present on anonymous user") }
+          define_method(attr) { |*, **| raise(NotImplementedError, "#{attr} is not present on anonymous user") }
         end
 
         def anonymous?
