@@ -28,5 +28,19 @@ module YiffSpace
       assert_includes(helper_methods, :has_permission?)
       assert_includes(helper_methods, :auth_client_config)
     end
+
+    test("scoped helper can be included without exposing unprefixed methods") do
+      controller = Class.new(ActionController::Base) do
+        include(YiffSpace::Auth::Helper::Scoped)
+      end
+
+      assert_includes(controller.instance_methods, :yiffspace_require_auth)
+      refute_includes(controller.instance_methods, :require_auth)
+      assert_includes(controller.private_instance_methods, :require_auth)
+
+      assert_respond_to(controller, :yiffspace_set_client_name)
+      refute_respond_to(controller, :set_client_name)
+      assert_includes(controller.private_methods, :set_client_name)
+    end
   end
 end

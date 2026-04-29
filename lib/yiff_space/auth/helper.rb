@@ -140,9 +140,13 @@ module YiffSpace
         extend(ActiveSupport::Concern)
         include(Helper)
 
+        included do
+          private(*Helper.instance_methods(false))
+          private_class_method(*Helper::ClassMethods.instance_methods(false))
+        end
+
         Helper.instance_methods(false).each do |name|
           define_method("yiffspace_#{name}") { |*args, **kwargs, &block| send(name, *args, **kwargs, &block) }
-          private(name) # rubocop:disable Style/AccessModifierDeclarations
         end
 
         module ClassMethods
@@ -150,7 +154,6 @@ module YiffSpace
 
           Helper::ClassMethods.instance_methods(false).each do |name|
             define_method("yiffspace_#{name}") { |*args, **kwargs, &block| send(name, *args, **kwargs, &block) }
-            private(name) # rubocop:disable Style/AccessModifierDeclarations
           end
         end
       end
