@@ -21,7 +21,7 @@ module YiffSpace
       config.autoload_paths   += [shared_controllers, shared_helpers, shared_models]
       config.eager_load_paths += [shared_controllers, shared_helpers, shared_models]
 
-      initializer("yiff_space.auth.asset_paths") do |app|
+      initializer("yiffspace.auth.asset_paths") do |app|
         app.config.assets.paths << "#{shared_assets}/config"
         app.config.assets.precompile += %w[yiff_space/application.css]
       end
@@ -36,10 +36,11 @@ module YiffSpace
             subclass.instance_variable_set(:@isolated, true)
             subclass.routes.default_scope = { module: "yiff_space/auth" }
             subclass.routes.draw do
-              defaults(auth_client: name.to_s) do
+              constraints(SetClientName.new(name)) do
                 get(:cb, controller: :root)
                 get(:logout, controller: :root)
                 get(:permissions, controller: :root)
+                get(:debug, controller: :root) if ::YiffSpace::Auth.enable_debug_action?
                 root(action: :show, controller: :root, as: :auth)
               end
             end

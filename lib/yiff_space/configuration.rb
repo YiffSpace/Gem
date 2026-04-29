@@ -3,8 +3,8 @@
 module YiffSpace
   class Configuration
     def auth(&block)
-      client = YiffSpace::Auth.register(:default) unless YiffSpace::Auth.instance_variable_get(:@clients).key?(:default)
-      client ||= YiffSpace::Auth[:default]
+      client = YiffSpace::Auth.register(Auth::DEFAULT_CLIENT_NAME) unless YiffSpace::Auth.instance_variable_get(:@clients).key?(Auth::DEFAULT_CLIENT_NAME)
+      client ||= YiffSpace::Auth[Auth::DEFAULT_CLIENT_NAME]
       block&.call(client)
       client
     end

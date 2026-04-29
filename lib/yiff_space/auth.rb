@@ -6,9 +6,12 @@ module YiffSpace
   module Auth
     class SerializeError < StandardError; end
 
-    ExchangeResponse = Struct.new(:auth, :user)
+    ExchangeResponse    = Struct.new(:auth, :user)
+    CLIENT_NAME_ENV     = "yiffspace.auth.client_name"
+    DEFAULT_CLIENT_NAME = :default
 
-    @clients = {}
+    @clients             = {}
+    @enable_debug_action = false
 
     module_function
 
@@ -24,7 +27,7 @@ module YiffSpace
     end
 
     def default
-      @clients[:default] || raise("no default client configured")
+      @clients[DEFAULT_CLIENT_NAME] || raise("no default client configured")
     end
 
     def find_by_client_id(client_id)
@@ -62,6 +65,18 @@ module YiffSpace
       find_by_client_id(data.client_id) or raise(SerializeError, "unknown client_id #{data.client_id.inspect}")
 
       OpenIDConnect::ResponseObject::UserInfo.new(data.attributes)
+    end
+
+    def enable_debug_action?
+      @enable_debug_action
+    end
+
+    def enable_debug_action!
+      @enable_debug_action = true
+    end
+
+    def disable_debug_action!
+      @enable_debug_action = false
     end
   end
 end

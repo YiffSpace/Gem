@@ -3,24 +3,26 @@
 module YiffSpace
   module Auth
     class RootController < ApplicationController
+      include(Helper)
+
       def show
-        state               = helpers.generate_state!
-        helpers.return_path = params[:path]
-        redirect_to(helpers.auth_client_config.url(state: state), allow_other_host: true)
+        state            = generate_state!
+        self.return_path = params[:path]
+        redirect_to(auth_client_config.url(state: state), allow_other_host: true)
       end
 
       def cb
         return render("yiff_space/error", locals: { message: "missing code in request" }, status: :bad_request) if params[:code].blank?
         return render("yiff_space/error", locals: { message: "missing state in request" }, status: :bad_request) if params[:state].blank?
-        return render("yiff_space/error", locals: { message: "invalid state in request" }, status: :bad_request) if params[:state] != session[helpers.auth_client_config.state_session_key]
+        return render("yiff_space/error", locals: { message: "invalid state in request" }, status: :bad_request) if params[:state] != state
 
-        helpers.reset_state!
-        exchange     = helpers.auth_client_config.exchange(params[:code])
-        helpers.auth = exchange.auth
-        helpers.user = exchange.user
-        path         = helpers.return_path
-        action       = helpers.auth_client_config.after_auth_action
-        helpers.reset_return_path!
+        reset_state!
+        exchange  = auth_client_config.exchange(params[:code])
+        self.auth = exchange.auth
+        self.user = exchange.user
+        path      = return_path
+        action    = auth_client_config.after_auth_action
+        reset_return_path!
         if action.is_a?(Proc)
           instance_exec(*(action.arity == 0 ? [] : [path]), &action)
           return if performed?
@@ -35,11 +37,11 @@ module YiffSpace
       end
 
       def logout
-        return redirect_back_or_to("/") if helpers.auth.blank? && helpers.user.blank?
-        helpers.return_path = params[:path] # sanitization
-        path                = helpers.return_path
-        action              = helpers.auth_client_config.after_logout_action
-        helpers.full_reset!
+        return redirect_back_or_to("/") if auth.blank? && user.blank?
+        self.return_path = params[:path] # sanitization
+        path             = return_path
+        action           = auth_client_config.after_logout_action
+        full_reset!
         if action.is_a?(Proc)
           action.call(*[self, path].slice(0, action.arity))
           return if performed?
@@ -48,6 +50,17 @@ module YiffSpace
         end
 
         redirect_to(path || "/")
+      end
+
+      def debug
+        return render("yiff_space/error", locals: { message: "Access Denied" }, status: :forbidden) unless YiffSpace::Auth.enable_debug_action?
+
+        render(json: {
+          env:     request.env.select { |env| env.start_with?("yiffspace.") },
+          params:  params,
+          session: session,
+          client:  auth_client_config.as_json.merge(client_secret: "[REDACTED]"),
+        })
       end
     end
   end

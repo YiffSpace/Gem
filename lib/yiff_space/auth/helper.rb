@@ -9,16 +9,17 @@ module YiffSpace
 
       module ClassMethods
         def set_client_name(name)
-          before_action do |request|
-            if request.respond_to?(:yiffspace_client_name=)
-              request.yiffspace_client_name = name
-            elsif request.respond_to?(:client_name=)
-              request.client_name = name
-            elsif request.respond_to?(:helpers)
-              if request.helpers.respond_to?(:yiffspace_client_name=)
-                request.helpers.yiffspace_client_name = name
-              elsif request.helpers.respond_to?(:client_name=)
-                request.helpers.client_name = name
+          before_action do |controller|
+            controller.request.env["yiffspace.auth.client_name"] = name
+            if controller.respond_to?(:yiffspace_client_name=)
+              controller.yiffspace_client_name = name
+            elsif controller.respond_to?(:client_name=)
+              controller.client_name = name
+            elsif controller.respond_to?(:helpers)
+              if controller.helpers.respond_to?(:yiffspace_client_name=)
+                controller.helpers.yiffspace_client_name = name
+              elsif controller.helpers.respond_to?(:client_name=)
+                controller.helpers.client_name = name
               end
             end
           end
@@ -129,11 +130,12 @@ module YiffSpace
       end
 
       def client_name
-        respond_to?(:params, true) && params[:yiffspace_auth_client_name]
+        puts("env: #{request.env[CLIENT_NAME_ENV]}")
+        respond_to?(:request, true) && request.env[CLIENT_NAME_ENV]
       end
 
       def client_name=(value)
-        params[:yiffspace_auth_client_name] = value.to_sym
+        request.env[CLIENT_NAME_ENV] = value.to_sym
       end
 
       module Scoped
