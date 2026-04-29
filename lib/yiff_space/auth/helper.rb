@@ -130,7 +130,6 @@ module YiffSpace
       end
 
       def client_name
-        puts("env: #{request.env[CLIENT_NAME_ENV]}")
         respond_to?(:request, true) && request.env[CLIENT_NAME_ENV]
       end
 

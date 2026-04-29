@@ -61,11 +61,6 @@ module YiffSpace
         true
       end
 
-      def each(&)
-        return enum_for(:each) unless block_given?
-        @values.each(&)
-      end
-
       def self.new_from_subtree(tree)
         obj = allocate
         obj.instance_variable_set(:@tree, tree)
