@@ -3,9 +3,9 @@
 module YiffSpace
   module Auth
     class ApplicationController < ::YiffSpace::ApplicationController
-      include(SessionHelper)
+      include(Helper)
 
-      helper(SessionHelper)
+      helper(Helper)
     end
   end
 end

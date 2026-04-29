@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class ApplicationController < ActionController::Base
-  helper(YiffSpace::Auth::SessionHelper)
+  helper(YiffSpace::Auth::Helper)
 
   def root
   end

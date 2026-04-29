@@ -1,8 +1,30 @@
 # frozen_string_literal: true
 
+require("active_support/concern")
+
 module YiffSpace
   module Auth
-    module SessionHelper
+    module Helper
+      extend(ActiveSupport::Concern)
+
+      module ClassMethods
+        def set_client_name(name)
+          before_action do |request|
+            if request.respond_to?(:yiffspace_client_name=)
+              request.yiffspace_client_name = name
+            elsif request.respond_to?(:client_name=)
+              request.client_name = name
+            elsif request.respond_to?(:helpers)
+              if request.helpers.respond_to?(:yiffspace_client_name=)
+                request.helpers.yiffspace_client_name = name
+              elsif request.helpers.respond_to?(:client_name=)
+                request.helpers.client_name = name
+              end
+            end
+          end
+        end
+      end
+
       def auth_raw
         session[auth_client_config.auth_session_key]
       end
@@ -115,11 +137,21 @@ module YiffSpace
       end
 
       module Scoped
-        include(SessionHelper)
+        extend(ActiveSupport::Concern)
+        include(Helper)
 
-        SessionHelper.instance_methods(false).each do |name|
+        Helper.instance_methods(false).each do |name|
           define_method("yiffspace_#{name}") { |*args, **kwargs, &block| send(name, *args, **kwargs, &block) }
           private(name) # rubocop:disable Style/AccessModifierDeclarations
+        end
+
+        module ClassMethods
+          include(Helper::ClassMethods)
+
+          Helper::ClassMethods.instance_methods(false).each do |name|
+            define_method("yiffspace_#{name}") { |*args, **kwargs, &block| send(name, *args, **kwargs, &block) }
+            private(name) # rubocop:disable Style/AccessModifierDeclarations
+          end
         end
       end
     end
