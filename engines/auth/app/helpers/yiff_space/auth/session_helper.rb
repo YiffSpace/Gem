@@ -4,7 +4,7 @@ module YiffSpace
   module Auth
     module SessionHelper
       def auth_raw
-        session[YiffSpace.config.auth.auth_session_key]
+        session[auth_client_config.auth_session_key]
       end
 
       def auth
@@ -17,16 +17,16 @@ module YiffSpace
       end
 
       def auth=(value)
-        value                                           = nil if value.is_a?(AuthInfo::Anonymous)
-        session[YiffSpace.config.auth.auth_session_key] = value&.to_session
+        value                                        = nil if value.is_a?(AuthInfo::Anonymous)
+        session[auth_client_config.auth_session_key] = value&.to_session
       end
 
       def reset_auth!
-        session.delete(YiffSpace.config.auth.auth_session_key)
+        session.delete(auth_client_config.auth_session_key)
       end
 
       def user_raw
-        session[YiffSpace.config.auth.user_session_key]
+        session[auth_client_config.user_session_key]
       end
 
       def user
@@ -39,42 +39,42 @@ module YiffSpace
       end
 
       def user=(value)
-        value                                           = nil if value.is_a?(UserInfo::Anonymous)
-        session[YiffSpace.config.auth.user_session_key] = value&.to_session
+        value                                        = nil if value.is_a?(UserInfo::Anonymous)
+        session[auth_client_config.user_session_key] = value&.to_session
       end
 
       def reset_user!
-        session.delete(YiffSpace.config.auth.user_session_key)
+        session.delete(auth_client_config.user_session_key)
       end
 
       def state
-        session[YiffSpace.config.auth.state_session_key]
+        session[auth_client_config.state_session_key]
       end
 
       def state=(value)
-        session[YiffSpace.config.auth.state_session_key] = value
+        session[auth_client_config.state_session_key] = value
       end
 
       def reset_state!
-        session.delete(YiffSpace.config.auth.state_session_key)
+        session.delete(auth_client_config.state_session_key)
       end
 
       def generate_state!
-        generator  = YiffSpace.config.auth.state_generator
+        generator  = auth_client_config.state_generator
         self.state = generator.call(*(generator.arity == 0 ? [] : [self]))
       end
 
       def return_path
-        session[YiffSpace.config.auth.return_path_session_key]
+        session[auth_client_config.return_path_session_key]
       end
 
       def return_path=(value)
         return if value && (!value.start_with?("/") || value.start_with?("//"))
-        session[YiffSpace.config.auth.return_path_session_key] = value
+        session[auth_client_config.return_path_session_key] = value
       end
 
       def reset_return_path!
-        session.delete(YiffSpace.config.auth.return_path_session_key)
+        session.delete(auth_client_config.return_path_session_key)
       end
 
       def full_reset!
@@ -91,6 +91,27 @@ module YiffSpace
       def has_permission?(name)
         return false unless auth?
         auth.permissions.has?(name)
+      end
+
+      def url_helpers
+        YiffSpace::Auth::Engine.for(client_name).routes.url_helpers
+      end
+
+      # Returns the Auth::Client for the current request. In auth engine controllers this is
+      # resolved from the routing default set by Engine.for; in host app controllers it falls
+      # back to the default registered client. Override in your controller to choose a specific
+      # client when multiple are registered.
+      def auth_client_config
+        client_name = self.client_name
+        client_name.present? ? YiffSpace::Auth[client_name.to_sym] : YiffSpace::Auth.default
+      end
+
+      def client_name
+        respond_to?(:params, true) && params[:yiffspace_auth_client_name]
+      end
+
+      def client_name=(value)
+        params[:yiffspace_auth_client_name] = value.to_sym
       end
 
       module Scoped

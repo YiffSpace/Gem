@@ -6,40 +6,29 @@ module YiffSpace
   module Auth
     class SerializeError < StandardError; end
 
-    module_function
-
-    def openid_config
-      @openid_config ||= OpenIDConnect::Discovery::Provider::Config.discover!("#{YiffSpace.config.auth.server_url}/application/o/#{YiffSpace.config.auth.client_name}/")
-    end
-
-    def client
-      @client ||= OpenIDConnect::Client.new(
-        identifier:             YiffSpace.config.auth.client_id,
-        secret:                 YiffSpace.config.auth.client_secret,
-        redirect_uri:           YiffSpace.config.auth.redirect_uri,
-        authorization_endpoint: openid_config.authorization_endpoint,
-        token_endpoint:         openid_config.token_endpoint,
-        userinfo_endpoint:      openid_config.userinfo_endpoint,
-      )
-    end
-
-    def url(state: nil)
-      client.authorization_uri(
-        scope: YiffSpace.config.auth.scopes,
-        state: state,
-      )
-    end
-
     ExchangeResponse = Struct.new(:auth, :user)
 
-    def exchange(code)
-      client.authorization_code = code
-      token                     = client.access_token!
-      user                      = token.userinfo!
-      id                        = user.raw_attributes["discord"]["id"]
-      authinfo                  = AuthInfo.new(token: token, entitlements: user.raw_attributes["entitlements"], roles: user.raw_attributes["roles"], id: id)
-      userinfo                  = UserInfo.new(user: user, id: id, discord: user.raw_attributes["discord"])
-      ExchangeResponse.new(authinfo, userinfo)
+    @clients = {}
+
+    module_function
+
+    def register(name, &block)
+      client = Client.new(name)
+      block&.call(client)
+      @clients[name.to_sym] = client
+      client
+    end
+
+    def [](name)
+      @clients[name.to_sym] or raise(KeyError, "unknown auth client: #{name.inspect}")
+    end
+
+    def default
+      @clients[:default] || raise("no default client configured")
+    end
+
+    def find_by_client_id(client_id)
+      @clients.values.find { |c| c.oidc_client.identifier == client_id }
     end
 
     def serialize_token(token)
@@ -52,11 +41,11 @@ module YiffSpace
       data = JSON.parse(data) if data.is_a?(String)
       data = ::YiffSpace::Utils::OpenHash.from(data)
       raise(SerializeError, "no client id for token, refusing to reconstruct") if data.client_id.nil?
-      if client.identifier != data.client_id
-        raise(SerializeError, "current client does not match token's client, refusing to reconstruct")
-      end
 
-      OpenIDConnect::AccessToken.new(data.attributes.merge(client: client))
+      client_config = find_by_client_id(data.client_id)
+      raise(SerializeError, "unknown client_id #{data.client_id.inspect}") unless client_config
+
+      OpenIDConnect::AccessToken.new(data.attributes.merge(client: client_config.oidc_client))
     end
 
     def serialize_user(user, client_id:)
@@ -68,10 +57,9 @@ module YiffSpace
       return data if data.is_a?(OpenIDConnect::ResponseObject::UserInfo)
       data = JSON.parse(data) if data.is_a?(String)
       data = ::YiffSpace::Utils::OpenHash.from(data)
-      raise(SerializeError, "no client id for token, refusing to reconstruct") if data.client_id.nil?
-      if client.identifier != data.client_id
-        raise(SerializeError, "current client does not match token's client, refusing to reconstruct")
-      end
+      raise(SerializeError, "no client id for user, refusing to reconstruct") if data.client_id.nil?
+
+      find_by_client_id(data.client_id) or raise(SerializeError, "unknown client_id #{data.client_id.inspect}")
 
       OpenIDConnect::ResponseObject::UserInfo.new(data.attributes)
     end

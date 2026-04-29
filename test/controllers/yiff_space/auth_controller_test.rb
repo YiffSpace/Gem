@@ -6,10 +6,10 @@ module YiffSpace
   class AuthControllerTest < ActionDispatch::IntegrationTest
     test("auth engine loads its routes") do
       assert_equal(
-        { controller: "yiff_space/auth/root", action: "cb" },
+        { controller: "yiff_space/auth/root", action: "cb", auth_client: "default" },
         YiffSpace::Auth::Engine.routes.recognize_path("/cb", method: :get),
       )
-      assert_recognizes({ controller: "yiff_space/auth/root", action: "cb" }, "/auth/cb")
+      assert_recognizes({ controller: "yiff_space/auth/root", action: "cb", auth_client: "default" }, "/auth/cb")
     end
 
     test("auth controller exposes session helper methods through helpers") do
@@ -26,6 +26,7 @@ module YiffSpace
       assert_includes(helper_methods, :user?)
       assert_includes(helper_methods, :require_auth)
       assert_includes(helper_methods, :has_permission?)
+      assert_includes(helper_methods, :auth_client_config)
     end
   end
 end

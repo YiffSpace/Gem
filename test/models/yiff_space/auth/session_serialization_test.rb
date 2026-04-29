@@ -42,9 +42,10 @@ module YiffSpace
 
       test("user info round-trips through session data") do
         user = UserInfo.new(
-          id:      "123",
-          user:    build_user,
-          discord: {
+          id:        "123",
+          user:      build_user,
+          client_id: "client-123",
+          discord:   {
             "id"            => "123",
             "avatar"        => "abc",
             "username"      => "fox",
@@ -64,9 +65,10 @@ module YiffSpace
 
       test("user info rebuilds from session data") do
         user = UserInfo.new(
-          id:      "123",
-          user:    build_user,
-          discord: {
+          id:        "123",
+          user:      build_user,
+          client_id: "client-123",
+          discord:   {
             "id"            => "123",
             "avatar"        => "abc",
             "username"      => "fox",
@@ -102,17 +104,14 @@ module YiffSpace
         )
       end
 
-      def with_stubbed_client(client)
-        singleton = YiffSpace::Auth.singleton_class
-        original = YiffSpace::Auth.method(:client) if YiffSpace::Auth.respond_to?(:client)
-        singleton.send(:define_method, :client) { client }
+      def with_stubbed_client(oidc_client)
+        clients = YiffSpace::Auth.instance_variable_get(:@clients)
+        stub_config = Object.new
+        stub_config.define_singleton_method(:oidc_client) { oidc_client }
+        clients[:_stub] = stub_config
         yield
       ensure
-        if original
-          singleton.send(:define_method, :client, original)
-        else
-          singleton.send(:remove_method, :client)
-        end
+        clients.delete(:_stub)
       end
     end
   end

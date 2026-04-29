@@ -3,18 +3,20 @@
 module YiffSpace
   module Auth
     class UserInfo
-      attr_reader(:id, :user, :discord)
+      attr_reader(:id, :user, :discord, :client_id)
 
       # @param id String
       # @param user OpenIDConnect::ResponseObject::UserInfo
       # @param discord Hash
-      def initialize(id:, user:, discord:)
+      # @param client_id String
+      def initialize(id:, user:, discord:, client_id:)
         raise(ArgumentError, "no id provided") if id.blank?
         raise(ArgumentError, "no user provided") if user.blank?
 
-        @id      = id
-        @user    = user
-        @discord = DiscordInfo.from_json(discord)
+        @id        = id
+        @user      = user
+        @discord   = DiscordInfo.from_json(discord)
+        @client_id = client_id
       end
 
       def anonymous?
@@ -56,7 +58,7 @@ module YiffSpace
         {
           "id"      => id,
           "discord" => discord.serializable_hash,
-          "user"    => ::YiffSpace::Auth.serialize_user(user, client_id: ::YiffSpace::Auth.client.identifier),
+          "user"    => ::YiffSpace::Auth.serialize_user(user, client_id: client_id),
         }
       end
 
@@ -69,10 +71,12 @@ module YiffSpace
         data = JSON.parse(data) if data.is_a?(String)
         data = ::YiffSpace::Utils::OpenHash.from(data)
 
+        user_data = ::YiffSpace::Utils::OpenHash.from(data.user)
         new(
-          id:      data.id,
-          discord: data.discord,
-          user:    ::YiffSpace::Auth.unserialize_user(data.user),
+          id:        data.id,
+          discord:   data.discord,
+          user:      ::YiffSpace::Auth.unserialize_user(user_data),
+          client_id: user_data.client_id,
         )
       end
 

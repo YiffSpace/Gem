@@ -6,20 +6,20 @@ module YiffSpace
       def show
         state               = helpers.generate_state!
         helpers.return_path = params[:path]
-        redirect_to(YiffSpace::Auth.url(state: state), allow_other_host: true)
+        redirect_to(helpers.auth_client_config.url(state: state), allow_other_host: true)
       end
 
       def cb
         return render("yiff_space/error", locals: { message: "missing code in request" }, status: :bad_request) if params[:code].blank?
         return render("yiff_space/error", locals: { message: "missing state in request" }, status: :bad_request) if params[:state].blank?
-        return render("yiff_space/error", locals: { message: "invalid state in request" }, status: :bad_request) if params[:state] != session[YiffSpace.config.auth.state_session_key]
+        return render("yiff_space/error", locals: { message: "invalid state in request" }, status: :bad_request) if params[:state] != session[helpers.auth_client_config.state_session_key]
 
         helpers.reset_state!
-        exchange     = Auth.exchange(params[:code])
+        exchange     = helpers.auth_client_config.exchange(params[:code])
         helpers.auth = exchange.auth
         helpers.user = exchange.user
         path         = helpers.return_path
-        action       = YiffSpace.config.auth.after_auth_action
+        action       = helpers.auth_client_config.after_auth_action
         helpers.reset_return_path!
         if action.is_a?(Proc)
           instance_exec(*(action.arity == 0 ? [] : [path]), &action)
@@ -38,7 +38,7 @@ module YiffSpace
         return redirect_back_or_to("/") if helpers.auth.blank? && helpers.user.blank?
         helpers.return_path = params[:path] # sanitization
         path                = helpers.return_path
-        action              = YiffSpace.config.auth.after_logout_action
+        action              = helpers.auth_client_config.after_logout_action
         helpers.full_reset!
         if action.is_a?(Proc)
           action.call(*[self, path].slice(0, action.arity))

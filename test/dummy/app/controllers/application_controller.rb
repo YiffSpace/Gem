@@ -6,7 +6,10 @@ class ApplicationController < ActionController::Base
   def root
   end
 
-  def dump_session
-    render(json: session)
+  def dump
+    render(json: {
+      params:  params,
+      session: session,
+    })
   end
 end
