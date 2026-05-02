@@ -43,6 +43,10 @@ module YiffSpace
         end
         oh
       end
+
+      def self.from_array(items, **)
+        items.map { |item| from(item, **) }
+      end
     end
   end
 end

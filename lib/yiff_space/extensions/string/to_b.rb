@@ -5,7 +5,7 @@ module YiffSpace
     module String
       module ToB
         def to_b
-          !falsy?
+          !match?(/\A(false|f|no|n|off|0)\z/i)
         end
       end
     end
