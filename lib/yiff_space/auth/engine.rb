@@ -22,8 +22,10 @@ module YiffSpace
       config.eager_load_paths += [shared_controllers, shared_helpers, shared_models]
 
       initializer("yiffspace.auth.asset_paths") do |app|
-        app.config.assets.paths << "#{shared_assets}/config"
-        app.config.assets.precompile += %w[yiff_space/application.css]
+        if app.config.respond_to?(:assets)
+          app.config.assets.paths << "#{shared_assets}/config"
+          app.config.assets.precompile += %w[yiff_space/application.css]
+        end
       end
 
       class << self
