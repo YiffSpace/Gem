@@ -8,7 +8,7 @@
 /test/dummy/log/*.log
 /test/dummy/storage/
 /test/dummy/tmp/
-/test/dummy/config/initializers/yiff_space.rb
+/test/dummy/config/initializers/yiffspace.rb
 /.codex
 /.claude
 /.idea

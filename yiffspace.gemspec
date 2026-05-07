@@ -1,17 +1,17 @@
 # frozen_string_literal: true
 
-require_relative("lib/yiff_space/version")
+require_relative("lib/yiffspace/version")
 
 Gem::Specification.new do |spec|
-  spec.name                  = "yiff_space"
+  spec.name                  = "yiffspace"
   spec.version               = YiffSpace::VERSION
   spec.authors               = ["Donovan_DMC"]
   spec.email                 = ["hewwo@yiff.rocks"]
   spec.homepage              = "https://yiff.space"
   spec.summary               = "Collection of ruby code for https://yiff.space and related projects"
-  spec.description           = "Collection of ruby code for https://yiff.space and related projects"
+  spec.description           = spec.summary
   spec.license               = "MIT"
-  spec.required_ruby_version = ">= 3.4"
+  spec.required_ruby_version = ">= 3.4.1"
 
   # Prevent pushing this gem to RubyGems.org. To allow pushes either set the "allowed_push_host"
   # to allow pushing to a single host or delete this section to allow pushing to any host.

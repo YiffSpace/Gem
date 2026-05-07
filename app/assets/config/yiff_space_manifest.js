@@ -1,1 +1,1 @@
-//= link_directory ../stylesheets/yiff_space .css
+//= link_directory ../stylesheets/yiffspace .css

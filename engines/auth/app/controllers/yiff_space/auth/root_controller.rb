@@ -12,9 +12,9 @@ module YiffSpace
       end
 
       def cb
-        return render("yiff_space/error", locals: { message: "missing code in request" }, status: :bad_request) if params[:code].blank?
-        return render("yiff_space/error", locals: { message: "missing state in request" }, status: :bad_request) if params[:state].blank?
-        return render("yiff_space/error", locals: { message: "invalid state in request" }, status: :bad_request) if params[:state] != state
+        return render("yiffspace/error", locals: { message: "missing code in request" }, status: :bad_request) if params[:code].blank?
+        return render("yiffspace/error", locals: { message: "missing state in request" }, status: :bad_request) if params[:state].blank?
+        return render("yiffspace/error", locals: { message: "invalid state in request" }, status: :bad_request) if params[:state] != state
 
         reset_state!
         exchange  = auth_client_config.exchange(params[:code])
@@ -53,7 +53,7 @@ module YiffSpace
       end
 
       def debug
-        return render("yiff_space/error", locals: { message: "Access Denied" }, status: :forbidden) unless YiffSpace::Auth.enable_debug_action?
+        return render("yiffspace/error", locals: { message: "Access Denied" }, status: :forbidden) unless YiffSpace::Auth.enable_debug_action?
 
         render(json: {
           env:     request.env.select { |env| env.start_with?("yiffspace.") },

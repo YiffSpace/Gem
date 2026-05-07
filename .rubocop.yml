@@ -206,7 +206,7 @@ Naming/AccessorMethodName:
 
 Naming/MethodName:
   Exclude:
-    - lib/yiff_space/extensions/arel/visitors/**/*.rb
+    - lib/yiffspace/extensions/arel/visitors/**/*.rb
 
 Metrics/ParameterLists:
   Enabled: false

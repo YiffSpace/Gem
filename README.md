@@ -7,7 +7,7 @@ Collection of ruby code for https://yiff.space and related projects
 Add this line to your application's Gemfile:
 
 ```ruby
-gem "yiff_space", git: "https://github.com/YiffSpace/Gem", ref: "ed51861cef6a48ae1388d6a278242e5d58d14eed"
+gem "yiffspace"
 ```
 
 And then execute:

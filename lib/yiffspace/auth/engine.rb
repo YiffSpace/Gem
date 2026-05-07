@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require("rails")
+
 module YiffSpace
   module Auth
     class Engine < ::Rails::Engine
@@ -24,7 +26,7 @@ module YiffSpace
       initializer("yiffspace.auth.asset_paths") do |app|
         if app.config.respond_to?(:assets)
           app.config.assets.paths << "#{shared_assets}/config"
-          app.config.assets.precompile += %w[yiff_space/application.css]
+          app.config.assets.precompile += %w[yiffspace/application.css]
         end
       end
 
@@ -33,10 +35,10 @@ module YiffSpace
           @instances              ||= {}
           @instances[name.to_sym] ||= begin
             subclass = Class.new(self)
-            subclass.engine_name("yiff_space_auth_#{name}")
+            subclass.engine_name("yiffspace_auth_#{name}")
             # Inherit isolation settings that aren't copied from the parent class
             subclass.instance_variable_set(:@isolated, true)
-            subclass.routes.default_scope = { module: "yiff_space/auth" }
+            subclass.routes.default_scope = { module: "yiffspace/auth" }
             subclass.routes.draw do
               constraints(SetClientName.new(name)) do
                 get(:cb, controller: :root)
