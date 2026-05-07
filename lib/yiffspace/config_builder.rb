@@ -30,9 +30,7 @@ module YiffSpace
           public_send(name, *args)
         end
       end
-      if type && type != :string
-        reviver(name, type)
-      end
+      reviver(name, type) if type && type != :string
       env_set[name] = env
     end
 
@@ -94,9 +92,7 @@ module YiffSpace
         node    = node[p]
       end
 
-      unless method_defined?(prefix)
-        define_method(prefix) { SubconfigProxy.new(self, path) }
-      end
+      define_method(prefix) { SubconfigProxy.new(self, path) } unless method_defined?(prefix)
 
       collector = Module.new do
         def self.collected
@@ -161,13 +157,9 @@ module YiffSpace
         full_path = @path + [name]
 
         flat = full_path.join("_").to_sym
-        if @owner.respond_to?(flat)
-          return @owner.public_send(flat, *, &)
-        end
+        return @owner.public_send(flat, *, &) if @owner.respond_to?(flat)
 
-        if subconfig_path?(full_path)
-          return SubconfigProxy.new(@owner, full_path)
-        end
+        return SubconfigProxy.new(@owner, full_path) if subconfig_path?(full_path)
 
         super
       end
@@ -187,6 +179,7 @@ module YiffSpace
         node = ConfigBuilder.subconfigs
         path.each do |p|
           return false unless node.key?(p)
+
           node = node[p]
         end
         true

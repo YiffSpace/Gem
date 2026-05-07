@@ -33,6 +33,7 @@ module YiffSpace
 
         parts.each do |part|
           return false unless current[part]
+
           current = current[part]
         end
 
@@ -72,6 +73,7 @@ module YiffSpace
         result = []
         node.each do |key, subtree|
           next if key == :__leaf__
+
           path = prefix.empty? ? key : "#{prefix}.#{key}"
           result << path if subtree[:__leaf__]
           result.concat(leaves_from_tree(subtree, path))

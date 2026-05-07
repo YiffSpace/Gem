@@ -10,10 +10,10 @@ module YiffSpace
             def visit_Arel_Nodes_LeftJoinLateral(o, collector)
               collector << "LEFT JOIN LATERAL "
               visit(o.left, collector)
-              if o.right
-                collector << " ON "
-                visit(o.right.expr, collector)
-              end
+              return unless o.right
+
+              collector << " ON "
+              visit(o.right.expr, collector)
             end
           end
         end

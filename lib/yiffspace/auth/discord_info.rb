@@ -12,20 +12,20 @@ module YiffSpace
           instance_variable_set("@#{attr}", options[attr])
         end
 
-        if YiffSpace.config.auth.update_discord_images
-          last_avatar = Rails.cache.fetch("yiffspace:auth:discord_avatar_update:#{id}")
-          last_banner = Rails.cache.fetch("yiffspace:auth:discord_banner_update:#{id}")
+        return unless YiffSpace.config.auth.update_discord_images
 
-          if last_avatar != avatar
-            Rails.cache.write("yiffspace:auth:discord_avatar_update:#{id}", avatar, expires_in: 30.days)
-            update_avatar
-          end
+        last_avatar = Rails.cache.fetch("yiffspace:auth:discord_avatar_update:#{id}")
+        last_banner = Rails.cache.fetch("yiffspace:auth:discord_banner_update:#{id}")
 
-          if last_banner != banner
-            Rails.cache.write("yiffspace:auth:discord_banner_update:#{id}", banner, expires_in: 30.days)
-            update_banner
-          end
+        if last_avatar != avatar
+          Rails.cache.write("yiffspace:auth:discord_avatar_update:#{id}", avatar, expires_in: 30.days)
+          update_avatar
         end
+
+        return unless last_banner != banner
+
+        Rails.cache.write("yiffspace:auth:discord_banner_update:#{id}", banner, expires_in: 30.days)
+        update_banner
       end
 
       def update_avatar
@@ -46,6 +46,7 @@ module YiffSpace
 
       def self.from_json(data)
         raise(ArgumentError, "invalid data") if data.blank?
+
         data = JSON.parse(data) if data.is_a?(String)
         data = ::YiffSpace::Utils::OpenHash.from(data)
 
@@ -54,6 +55,7 @@ module YiffSpace
 
       def self.from_session(data)
         return nil if data.blank?
+
         from_json(data)
       end
     end

@@ -55,6 +55,7 @@ module YiffSpace
 
         def self.from_session(data)
           return nil if data.blank?
+
           from_json(data)
         end
       end

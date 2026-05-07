@@ -6,8 +6,7 @@ class ApplicationController < ActionController::Base
   helper(YiffSpace::Auth::Helper)
   set_client_name(:test)
 
-  def root
-  end
+  def root; end
 
   def dump
     render(json: {

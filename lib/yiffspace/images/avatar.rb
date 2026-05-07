@@ -13,12 +13,14 @@ module YiffSpace
       def get_for(id, type)
         klass = find_type(type)
         raise(StandardError, "No avatar class for type: #{type}") if klass.nil?
+
         klass.new(id)
       end
 
       def find_type(type)
         constants.map { |c| [c, const_get(c)] }.find do |_const, value|
           next unless value < Base
+
           value.try(:type)&.to_sym == type.to_sym
         end&.second
       end

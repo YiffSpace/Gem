@@ -8,7 +8,7 @@ module YiffSpace
       extend(ActiveSupport::Concern)
 
       module ClassMethods
-        def set_client_name(name)
+        def set_client_name(name) # rubocop:disable Naming/AccessorMethodName
           before_action do |controller|
             controller.request.env["yiffspace.auth.client_name"] = name
             if controller.respond_to?(:yiffspace_client_name=)
@@ -32,6 +32,7 @@ module YiffSpace
 
       def auth
         return AuthInfo::Anonymous.instance if auth_raw.blank?
+
         AuthInfo.from_session(auth_raw)
       end
 
@@ -54,6 +55,7 @@ module YiffSpace
 
       def user
         return UserInfo::Anonymous.instance if user_raw.blank?
+
         UserInfo.from_session(user_raw)
       end
 
@@ -84,7 +86,7 @@ module YiffSpace
 
       def generate_state!
         generator  = auth_client_config.state_generator
-        self.state = generator.call(*(generator.arity == 0 ? [] : [self]))
+        self.state = generator.call(*(generator.arity.zero? ? [] : [self]))
       end
 
       def return_path
@@ -93,6 +95,7 @@ module YiffSpace
 
       def return_path=(value)
         return if value && (!value.start_with?("/") || value.start_with?("//"))
+
         session[auth_client_config.return_path_session_key] = value
       end
 
@@ -113,6 +116,7 @@ module YiffSpace
 
       def has_permission?(name)
         return false unless auth?
+
         auth.permissions.has?(name)
       end
 

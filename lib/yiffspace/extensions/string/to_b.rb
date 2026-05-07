@@ -4,7 +4,7 @@ module YiffSpace
   module Extensions
     module String
       module ToB
-        def to_b
+        def to_b # rubocop:disable Naming/PredicateMethod
           !match?(/\A(false|f|no|n|off|0)\z/i)
         end
       end

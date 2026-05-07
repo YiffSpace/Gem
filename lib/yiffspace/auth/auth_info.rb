@@ -12,6 +12,7 @@ module YiffSpace
       def initialize(id:, entitlements:, roles:, token:)
         raise(ArgumentError, "no id provided") if id.blank?
         raise(ArgumentError, "no token provided") if token.blank?
+
         @id           = id
         @token        = token
         @entitlements = Array(entitlements)
@@ -51,6 +52,7 @@ module YiffSpace
 
       def self.from_json(data)
         raise(ArgumentError, "invalid data") if data.blank?
+
         data = JSON.parse(data) if data.is_a?(String)
         data = ::YiffSpace::Utils::OpenHash.from(data)
 
@@ -64,6 +66,7 @@ module YiffSpace
 
       def self.from_session(data)
         return nil if data.blank?
+
         from_json(data)
       end
     end

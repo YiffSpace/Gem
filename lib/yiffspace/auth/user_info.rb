@@ -68,6 +68,7 @@ module YiffSpace
 
       def self.from_json(data)
         raise(ArgumentError, "invalid data") if data.blank?
+
         data = JSON.parse(data) if data.is_a?(String)
         data = ::YiffSpace::Utils::OpenHash.from(data)
 
@@ -82,6 +83,7 @@ module YiffSpace
 
       def self.from_session(data)
         return nil if data.blank?
+
         from_json(data)
       end
     end

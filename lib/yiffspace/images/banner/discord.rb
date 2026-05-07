@@ -18,6 +18,7 @@ module YiffSpace
 
         def update(hash)
           raise(StandardError, "images.update_token config option must be set to use banner update") if YiffSpace.config.images.update_token.blank?
+
           response = HTTParty.post("#{YiffSpace.config.images.server_url}/banner/discord/update/#{id}",
                                    YiffSpace.config.images.httparty_options.deep_merge(
                                      headers: {
@@ -26,9 +27,7 @@ module YiffSpace
                                      },
                                      body:    { hash: hash }.to_json,
                                    ))
-          unless response.key?("updated")
-            Rails.logger.error("banner update failed: #{response.to_json}")
-          end
+          Rails.logger.error("banner update failed: #{response.to_json}") unless response.key?("updated")
 
           response.fetch("updated", false)
         end

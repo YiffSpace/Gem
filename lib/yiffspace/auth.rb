@@ -41,6 +41,7 @@ module YiffSpace
     def unserialize_token(data)
       raise(SerializeError, "no token data provided") if data.blank?
       return data if data.is_a?(OpenIDConnect::AccessToken)
+
       data = JSON.parse(data) if data.is_a?(String)
       data = ::YiffSpace::Utils::OpenHash.from(data)
       raise(SerializeError, "no client id for token, refusing to reconstruct") if data.client_id.nil?
@@ -58,6 +59,7 @@ module YiffSpace
     def unserialize_user(data)
       raise(SerializeError, "no user data provided") if data.blank?
       return data if data.is_a?(OpenIDConnect::ResponseObject::UserInfo)
+
       data = JSON.parse(data) if data.is_a?(String)
       data = ::YiffSpace::Utils::OpenHash.from(data)
       raise(SerializeError, "no client id for user, refusing to reconstruct") if data.client_id.nil?

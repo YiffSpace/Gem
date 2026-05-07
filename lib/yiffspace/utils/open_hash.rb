@@ -12,6 +12,7 @@ module YiffSpace
 
       def respond_to_missing?(name, include_private = false)
         return true if @respond_to_missing
+
         name = name.to_s
         key?(name) || name.end_with?("=") || super
       end
@@ -31,6 +32,7 @@ module YiffSpace
       def self.from(hash = nil, recursive: true, respond_to_missing: true, **kwargs)
         hash = kwargs if hash.nil? && kwargs.any?
         raise(ArgumentError, "no hash provided") if hash.nil?
+
         oh = OpenHash.new(respond_to_missing: respond_to_missing)
         hash.each do |key, value|
           if recursive && value.is_a?(Hash)

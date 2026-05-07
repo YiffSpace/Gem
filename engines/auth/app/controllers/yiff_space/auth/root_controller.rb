@@ -24,7 +24,7 @@ module YiffSpace
         action    = auth_client_config.after_auth_action
         reset_return_path!
         if action.is_a?(Proc)
-          instance_exec(*(action.arity == 0 ? [] : [path]), &action)
+          instance_exec(*(action.arity.zero? ? [] : [path]), &action)
           return if performed?
         elsif action.is_a?(String)
           return redirect_to(action)
@@ -33,11 +33,11 @@ module YiffSpace
         redirect_to(path || "/")
       end
 
-      def permissions
-      end
+      def permissions; end
 
       def logout
         return redirect_back_or_to("/") if auth.blank? && user.blank?
+
         self.return_path = params[:path] # sanitization
         path             = return_path
         action           = auth_client_config.after_logout_action
