@@ -3,9 +3,14 @@ inherit_mode:
     - Exclude
     - Include
 
+inherit_gem:
+  rubocop-yiffspace:
+    - config/rails.yml
+
 plugins:
   - rubocop-erb
   - rubocop-rails
+  - rubocop-yiffspace
 
 AllCops:
   NewCops: enable
@@ -198,6 +203,10 @@ Style/RedundantAssignment:
 
 Naming/AccessorMethodName:
   Enabled: false
+
+Naming/MethodName:
+  Exclude:
+    - lib/yiff_space/extensions/arel/visitors/**/*.rb
 
 Metrics/ParameterLists:
   Enabled: false

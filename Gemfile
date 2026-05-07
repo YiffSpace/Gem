@@ -15,6 +15,9 @@ gem("sprockets-rails")
 # Start debugger with binding.b [https://github.com/ruby/debug]
 # gem "debug", ">= 1.0.0"
 
-gem("rubocop", "~> 1.86")
-gem("rubocop-erb", "~> 0.7.1")
-gem("rubocop-rails", "~> 2.34")
+group(:development) do
+  gem("rubocop", "~> 1.86", require: false)
+  gem("rubocop-erb", "~> 0.7.1", require: false)
+  gem("rubocop-rails", "~> 2.34", require: false)
+  gem("rubocop-yiffspace", "~> 0.0.1", require: false)
+end

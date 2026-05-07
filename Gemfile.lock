@@ -292,6 +292,9 @@ GEM
       rack (>= 1.1)
       rubocop (>= 1.75.0, < 2.0)
       rubocop-ast (>= 1.44.0, < 2.0)
+    rubocop-yiffspace (0.0.1)
+      lint_roller (~> 1.1)
+      rubocop (>= 1.72.2)
     ruby-progressbar (1.13.0)
     securerandom (0.4.1)
     sprockets (4.2.2)
@@ -354,6 +357,7 @@ DEPENDENCIES
   rubocop (~> 1.86)
   rubocop-erb (~> 0.7.1)
   rubocop-rails (~> 2.34)
+  rubocop-yiffspace (~> 0.0.1)
   sprockets-rails
   sqlite3
   yiff_space!
@@ -456,6 +460,7 @@ CHECKSUMS
   rubocop-ast (1.49.1) sha256=4412f3ee70f6fe4546cc489548e0f6fcf76cafcfa80fa03af67098ffed755035
   rubocop-erb (0.7.1) sha256=17d376b5b9ebb08b75f6bce6bcdc61603b506ef4523473483885d2be88e9099d
   rubocop-rails (2.34.3) sha256=10d37989024865ecda8199f311f3faca990143fbac967de943f88aca11eb9ad2
+  rubocop-yiffspace (0.0.1) sha256=ed6e2aa1be48ce0dbdb534fecb1c72bf51531b7d6a1413cbf0fb6cf19382087c
   ruby-progressbar (1.13.0) sha256=80fc9c47a9b640d6834e0dc7b3c94c9df37f08cb072b7761e4a71e22cff29b33
   securerandom (0.4.1) sha256=cc5193d414a4341b6e225f0cb4446aceca8e50d5e1888743fac16987638ea0b1
   sprockets (4.2.2) sha256=761e5a49f1c288704763f73139763564c845a8f856d52fba013458f8af1b59b1
