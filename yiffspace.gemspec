@@ -23,8 +23,10 @@ Gem::Specification.new do |spec|
     Dir["{app,config,db,engines,lib}/**/*", "LICENSE", "Rakefile", "README.md", "CHANGELOG.md"]
   end
 
+  spec.add_dependency("abbrev", ">= 0.1.2")
   spec.add_dependency("httparty", ">= 0.24")
   spec.add_dependency("openid_connect", ">= 2.3")
   spec.add_dependency("rails", ">= 7.1")
+  spec.add_dependency("request_store", ">= 1.7")
   spec.add_dependency("zeitwerk", ">= 2.6")
 end
