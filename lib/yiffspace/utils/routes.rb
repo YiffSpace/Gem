@@ -14,18 +14,14 @@ module YiffSpace
       module_function
 
       def method_missing(name, *, &)
-        target.send(name, *, &)
+        url_helpers = Rails.application.routes.url_helpers
+        return url_helpers.public_send(name, *, &) if url_helpers.respond_to?(name)
+
+        super
       end
 
-      def respond_to_missing?(...)
-        target.respond_to?(...)
-      end
-
-      private
-
-      # Lazily resolved so application is not referenced at load time.
-      def target
-        Rails.application.routes.url_helpers
+      def respond_to_missing?(name, include_private = false)
+        Rails.application.routes.url_helpers.respond_to?(name, include_private) || super
       end
     end
   end

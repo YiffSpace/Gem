@@ -6,18 +6,14 @@ module YiffSpace
       module_function
 
       def method_missing(name, *, &)
-        target.send(name, *, &)
+        helpers = ApplicationController.helpers
+        return helpers.public_send(name, *, &) if helpers.respond_to?(name)
+
+        super
       end
 
-      def respond_to_missing?(...)
-        target.respond_to?(...)
-      end
-
-      private
-
-      # Lazily resolved so ApplicationController is not referenced at load time.
-      def target
-        ApplicationController.helpers
+      def respond_to_missing?(name, include_private = false)
+        ApplicationController.helpers.respond_to?(name, include_private) || super
       end
     end
   end
