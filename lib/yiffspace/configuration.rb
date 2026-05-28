@@ -11,11 +11,15 @@ module YiffSpace
 
     # The application's User model class. Used by Utils::Current, Search::QueryDSL, etc.
     # Falls back to ::User at call time when nil.
-    attr_accessor(:user_class)
+    attr_writer(:user_class)
+
+    # The application's User model class. Used by Utils::UserResolvable
+    # Falls back to ::UserLike at call time when nil.
+    attr_writer(:user_like_class)
 
     # The application's UserResolvable class. Used by Utils::Current.
     # Falls back to ::UserResolvable at call time when nil.
-    attr_accessor(:user_resolvable_class)
+    attr_writer(:user_resolvable_class)
 
     # The CurrentAttributes class used to access the current user in model concerns.
     # Defaults to YiffSpace::Utils::Current.
@@ -39,10 +43,23 @@ module YiffSpace
       @max_multi_count       = -> { 100 }
       @redis_url             = -> {}
       @user_class            = nil
+      @user_like_class       = nil
       @user_resolvable_class = nil
       @current_class         = nil
       @default_ip_address    = "127.0.0.1"
       @anonymous_user_name   = -> { "Anonymous" }
+    end
+
+    def user_class
+      @user_class || ::User
+    end
+
+    def user_like_class
+      @user_like_class || Utils::UserLike
+    end
+
+    def user_resolable_class
+      @user_resolvable_class || Utils::UserResolvable
     end
 
     # Returns the configured current class, defaulting to YiffSpace::Utils::Current.
@@ -52,12 +69,12 @@ module YiffSpace
 
     # Lazily built: calls user_class (or ::User) at invocation time, not config time.
     def anonymous_user_getter
-      @anonymous_user_getter ||= -> { (user_class || ::User).anonymous }
+      @anonymous_user_getter ||= -> { user_class.anonymous }
     end
 
     # Lazily built: calls user_class (or ::User) at invocation time, not config time.
     def system_user_getter
-      @system_user_getter ||= -> { (user_class || ::User).system }
+      @system_user_getter ||= -> { user_class.system }
     end
 
     def redis_url=(value)

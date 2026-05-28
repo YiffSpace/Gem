@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
 module YiffSpace
-  VERSION = "0.0.4"
+  module Utils
+    module UserLike
+    end
+  end
 end
