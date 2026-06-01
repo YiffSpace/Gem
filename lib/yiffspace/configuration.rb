@@ -58,7 +58,7 @@ module YiffSpace
       @user_like_class || Utils::UserLike
     end
 
-    def user_resolable_class
+    def user_resolvable_class
       @user_resolvable_class || Utils::UserResolvable
     end
 
