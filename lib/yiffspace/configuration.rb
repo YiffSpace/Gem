@@ -28,6 +28,12 @@ module YiffSpace
     # The default IP address assigned to Utils::Current when none is present.
     attr_accessor(:default_ip_address)
 
+    # The `last_ip_addr` attribute of the User model, used by the UserResolvableMethods concern
+    attr_accessor(:last_ip_addr_attribute)
+
+    # The anonymous user's name, can be a proc
+    attr_reader(:anonymous_user_name)
+
     # Override the proc used to fetch the anonymous user. Must respond to #call.
     # Default: -> { (user_class || ::User).anonymous }
     attr_writer(:anonymous_user_getter)
@@ -36,21 +42,16 @@ module YiffSpace
     # Default: -> { (user_class || ::User).system }
     attr_writer(:system_user_getter)
 
-    # The anonymous user's name, can be a proc
-    attr_reader(:anonymous_user_name)
-
-    # The `last_ip_addr` attribute of the User model, used by the UserResolvableMethods concern
-    attr_accessor(:last_ip_addr_attribute)
-
     def initialize
-      @max_multi_count       = -> { 100 }
-      @redis_url             = -> {}
-      @user_class            = nil
-      @user_like_class       = nil
-      @user_resolvable_class = nil
-      @current_class         = nil
-      @default_ip_address    = "127.0.0.1"
-      @anonymous_user_name   = -> { "Anonymous" }
+      @max_multi_count        = -> { 100 }
+      @redis_url              = -> {}
+      @user_class             = nil
+      @user_like_class        = nil
+      @user_resolvable_class  = nil
+      @current_class          = nil
+      @default_ip_address     = "127.0.0.1"
+      @last_ip_addr_attribute = :last_ip_addr
+      @anonymous_user_name    = -> { "Anonymous" }
     end
 
     def user_class

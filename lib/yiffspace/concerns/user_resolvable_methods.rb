@@ -4,7 +4,8 @@ module YiffSpace
   module Concerns
     module UserResolvableMethods
       def resolvable(ip_addr = nil)
-        UserResolvable.new(self, ip_addr || send(YiffSpace.config.last_ip_addr_attribute) || YiffSpace.config.default_ip_address)
+        attr = YiffSpace.config.last_ip_addr_attribute
+        UserResolvable.new(self, ip_addr || (attr && respond_to?(attr) ? send(attr) : nil) || YiffSpace.config.default_ip_address)
       end
 
       def resolve

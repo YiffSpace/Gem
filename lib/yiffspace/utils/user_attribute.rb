@@ -10,7 +10,8 @@ module YiffSpace
       class CloneError < StandardError; end
       attr_reader(:klass, :attribute, :db, :ip, :optional, :clones, :overwrite, :aliases, :ignore_nil, :ar_options)
 
-      def initialize(klass, attribute, db:, ip: !db, optional: !db, clones: [], overwrite: false, aliases: [], ignore_nil: false, **ar_options)
+      # noinspection RubyUnusedLocalVariable
+      def initialize(klass, attribute, db:, ip: !db, optional: !db, clones: [], clone: [], overwrite: false, aliases: [], alias: [], ignore_nil: false, **ar_options)
         UserAttribute.class_setup(klass)
         @klass = klass
         @attribute = attribute.to_sym
@@ -18,9 +19,9 @@ module YiffSpace
         # noinspection RubySimplifyBooleanInspection
         @ip = ip == true ? :"#{attribute}_ip_addr" : ip
         @optional = optional
-        @clones = Array(clones).map(&:to_sym)
+        @clones = Array(clones.presence || clone).map(&:to_sym)
         @overwrite = overwrite
-        @aliases = Array(aliases).map(&:to_sym)
+        @aliases = Array(aliases.presence || binding.local_variable_get(:alias)).map(&:to_sym)
         @ignore_nil = ignore_nil
         @ar_options = ar_options
         if ar_options.any? && !db # rubocop:disable Style/IfUnlessModifier
@@ -191,7 +192,7 @@ module YiffSpace
         klass.instance_exec do
           scope("for_#{ua.attribute}", ->(value) { where(ua.db && ua.ar_options.key?(:foreign_key) ? ua.ar_options[:foreign_key] : "#{ua.attribute}_id" => u2id(value)) }) unless respond_to?("for_#{ua.attribute}")
           scope("for_#{ua.attribute}_id", ->(value) { where(ua.db && ua.ar_options.key?(:foreign_key) ? ua.ar_options[:foreign_key] : "#{ua.attribute}_id" => value) }) unless respond_to?("for_#{ua.attribute}_id")
-          scope("for_#{ua.attribute}_name", ->(value) { where(ua.db && ua.ar_options.key?(:foreign_key) ? ua.ar_options[:foreign_key] : "#{ua.attribute}_id" => ::User.name_to_id(value)) }) unless respond_to?("for_#{ua.attribute}_name")
+          scope("for_#{ua.attribute}_name", ->(value) { where(ua.db && ua.ar_options.key?(:foreign_key) ? ua.ar_options[:foreign_key] : "#{ua.attribute}_id" => YiffSpace.config.user_class.name_to_id(value)) }) unless respond_to?("for_#{ua.attribute}_name")
         end
 
         aliases.each do |alias_attr|
