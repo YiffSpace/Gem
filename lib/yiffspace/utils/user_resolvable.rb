@@ -1,13 +1,16 @@
 # frozen_string_literal: true
 
+require("active_support/core_ext/module/delegation")
+require("active_support/core_ext/string/inflections")
+
 module YiffSpace
   module Utils
     class UserResolvable
       attr_reader(:user, :ip_addr)
 
       def initialize(user, ip_addr, validate: true)
-        if user.is_a?(UserResolvable)
-          TraceLogger.warn("UserResolvable", "Unexpectedly received UserResolvable for user argument")
+        if user.is_a?(YiffSpace.config.user_resolvable_class)
+          TraceLogger.warn(self.class.name.demodulize, "Unexpectedly received #{user.class.name} for user argument")
           user = recursive_resolve(user)
         end
         @user = user
@@ -36,14 +39,14 @@ module YiffSpace
 
       def self.recursive_resolve(resolvable)
         result = resolvable
-        result = result.resolve while result.is_a?(UserResolvable)
+        result = result.resolve while result.is_a?(YiffSpace.config.user_resolvable_class)
         result
       end
 
       def ==(other)
         return other == user if other.is_a?(YiffSpace.config.user_class)
 
-        other.is_a?(UserResolvable) && user == other.user
+        other.is_a?(YiffSpace.config.user_resolvable_class) && user == other.user
       end
 
       def ===(other)

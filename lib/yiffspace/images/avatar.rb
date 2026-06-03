@@ -24,6 +24,10 @@ module YiffSpace
           value.try(:type)&.to_sym == type.to_sym
         end&.second
       end
+
+      def find_type!(type)
+        find_type(type) || raise(StandardError, "No avatar class for type: #{type}")
+      end
     end
   end
 end

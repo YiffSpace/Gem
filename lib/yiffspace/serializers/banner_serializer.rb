@@ -1,0 +1,23 @@
+# frozen_string_literal: true
+
+require("active_job")
+
+module YiffSpace
+  module Serializers
+    class BannerSerializer < ActiveJob::Serializers::ObjectSerializer
+      def serialize(arg)
+        super(**arg.serializable_hash)
+      end
+
+      def deserialize(arg)
+        Images::Banner::Base.from_json(arg)
+      end
+
+      private
+
+      def klass
+        Images::Banner::Base
+      end
+    end
+  end
+end

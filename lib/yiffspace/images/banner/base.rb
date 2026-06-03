@@ -20,6 +20,21 @@ module YiffSpace
         def update(*)
           raise(NotImplementedError)
         end
+
+        def serializable_hash(*)
+          { "id" => @id, "type" => @type }
+        end
+
+        def self.from_json(data)
+          raise(ArgumentError, "invalid data") if data.blank?
+
+          data = JSON.parse(data) if data.is_a?(String)
+          data = ::YiffSpace::Utils::OpenHash.from(data)
+
+          return Banner.find_type(data.type).from_json(data) if self == Base
+
+          new(data.id)
+        end
       end
     end
   end

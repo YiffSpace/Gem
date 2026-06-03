@@ -36,8 +36,11 @@ module YiffSpace
     # Default: -> { (user_class || ::User).system }
     attr_writer(:system_user_getter)
 
-    # The anonymous user name
+    # The anonymous user's name, can be a proc
     attr_reader(:anonymous_user_name)
+
+    # The `last_ip_addr` attribute of the User model, used by the UserResolvableMethods concern
+    attr_accessor(:last_ip_addr_attribute)
 
     def initialize
       @max_multi_count       = -> { 100 }

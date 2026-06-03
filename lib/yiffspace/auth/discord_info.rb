@@ -36,7 +36,7 @@ module YiffSpace
         Images::Banner.get_for(id, :discord).update(banner)
       end
 
-      def serializable_hash
+      def serializable_hash(*)
         ATTRIBUTES.to_h { |key| [key.to_s, instance_variable_get("@#{key}")] }
       end
 
