@@ -38,7 +38,7 @@ module YiffSpace
             subclass.engine_name("yiffspace_auth_#{name}")
             # Inherit isolation settings that aren't copied from the parent class
             subclass.instance_variable_set(:@isolated, true)
-            subclass.routes.default_scope = { module: "yiffspace/auth" }
+            subclass.routes.default_scope = { module: "yiff_space/auth" }
             subclass.routes.draw do
               constraints(SetClientName.new(name)) do
                 get(:cb, controller: :root)
