@@ -30,7 +30,7 @@ module YiffSpace
 
       def has?(perm)
         current = @tree
-        parts   = perm.split(".")
+        parts   = perm.split(@separator)
 
         parts.each do |part|
           return false unless current[part]

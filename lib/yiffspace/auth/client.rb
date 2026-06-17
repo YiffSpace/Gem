@@ -5,8 +5,8 @@ require_relative("../core_ext/logto/named_session_storage")
 module YiffSpace
   module Auth
     class Client
-      attr_accessor(:client_id, :client_secret, :scopes, :resource,
-                    :redirect_uri, :server_url, :auth_session_key,
+      attr_accessor(:client_id, :client_secret, :scopes, :permissions,
+                    :resource, :redirect_uri, :server_url, :auth_session_key,
                     :user_session_key, :update_discord_images, :permissions_separator)
 
       attr_reader(:name)
@@ -14,6 +14,7 @@ module YiffSpace
       def initialize(name)
         @name                    = name.to_sym
         @scopes                  = %i[openid offline_access profile roles identities]
+        @permissions             = []
         @redirect_uri            = "http://127.0.0.1:3000/auth/cb"
         @server_url              = "https://auth.yiff.space"
         @auth_session_key        = :"yiffspace_auth_#{name}"
@@ -28,7 +29,7 @@ module YiffSpace
             endpoint:   server_url,
             app_id:     client_id,
             app_secret: client_secret,
-            scopes:     scopes,
+            scopes:     scopes + permissions,
             resources:  [resource].compact,
           ),
           # Allow the client to redirect to other hosts (i.e. your Logto tenant)
