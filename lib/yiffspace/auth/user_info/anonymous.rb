@@ -58,7 +58,7 @@ module YiffSpace
         end
 
         def self.from_json(*)
-          Anonymous.new
+          Anonymous.instance
         end
 
         def self.from_session(data)

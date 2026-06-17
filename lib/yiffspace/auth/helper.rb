@@ -72,50 +72,21 @@ module YiffSpace
         session.delete(auth_client_config.user_session_key)
       end
 
-      def state
-        session[auth_client_config.state_session_key]
-      end
-
-      def state=(value)
-        session[auth_client_config.state_session_key] = value
-      end
-
-      def reset_state!
-        session.delete(auth_client_config.state_session_key)
-      end
-
-      def generate_state!
-        generator  = auth_client_config.state_generator
-        self.state = generator.call(*(generator.arity.zero? ? [] : [self]))
-      end
-
-      def return_path
-        session[auth_client_config.return_path_session_key]
-      end
-
-      def return_path=(value)
-        return if value && (!value.start_with?("/") || value.start_with?("//"))
-
-        session[auth_client_config.return_path_session_key] = value
-      end
-
-      def reset_return_path!
-        session.delete(auth_client_config.return_path_session_key)
-      end
-
       def full_reset!
-        reset_state!
         reset_auth!
         reset_user!
-        reset_return_path!
       end
 
       def require_auth(path)
-        redirect_to(path) unless auth?
+        redirect_to(path) unless user?
+      end
+
+      def logged_in?
+        user?
       end
 
       def has_permission?(name)
-        return false unless auth?
+        return false unless user?
 
         auth.permissions.has?(name)
       end

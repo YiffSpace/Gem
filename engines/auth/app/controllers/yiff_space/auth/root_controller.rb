@@ -6,50 +6,22 @@ module YiffSpace
       include(Helper)
 
       def show
-        state            = generate_state!
-        self.return_path = params[:path]
-        redirect_to(auth_client_config.url(state: state), allow_other_host: true)
+        client.sign_in(redirect_uri: auth_client_config.redirect_uri, post_redirect_uri: params[:path] || "/")
       end
 
       def cb
-        return render("yiffspace/error", locals: { message: "missing code in request" }, status: :bad_request) if params[:code].blank?
-        return render("yiffspace/error", locals: { message: "missing state in request" }, status: :bad_request) if params[:state].blank?
-        return render("yiffspace/error", locals: { message: "invalid state in request" }, status: :bad_request) if params[:state] != state
-
-        reset_state!
-        exchange  = auth_client_config.exchange(params[:code])
-        self.auth = exchange.auth
-        self.user = exchange.user
-        path      = return_path
-        action    = auth_client_config.after_auth_action
-        reset_return_path!
-        if action.is_a?(Proc)
-          instance_exec(*(action.arity.zero? ? [] : [path]), &action)
-          return if performed?
-        elsif action.is_a?(String)
-          return redirect_to(action)
-        end
-
-        redirect_to(path || "/")
+        client.handle_sign_in_callback(url: request.original_url)
+        user = client.fetch_user_info
+        token = client.access_token_claims(resource: auth_client_config.resource)
+        self.user = UserInfo.new(id: user["identities"]["discord"]["userId"], user: user, discord: user["identities"]["discord"]["details"]["rawData"])
+        self.auth = AuthInfo.new(id: user["identities"]["discord"]["userId"], token: token, permissions: token["scope"].split, roles: user["roles"], client_id: auth_client_config.client_id)
       end
 
       def permissions; end
 
       def logout
-        return redirect_back_or_to("/") if auth.blank? && user.blank?
-
-        self.return_path = params[:path] # sanitization
-        path             = return_path
-        action           = auth_client_config.after_logout_action
-        full_reset!
-        if action.is_a?(Proc)
-          action.call(*[self, path].slice(0, action.arity))
-          return if performed?
-        elsif action.is_a?(String)
-          return redirect_to(action)
-        end
-
-        redirect_to(path || "/")
+        client.sign_out(post_logout_redirect_uri: request.base_url)
+        reset_user!
       end
 
       def debug
@@ -60,7 +32,15 @@ module YiffSpace
           params:  params,
           session: session,
           client:  auth_client_config.as_json.merge(client_secret: "[REDACTED]"),
+          user:    client.fetch_user_info,
+          token:   client.access_token_claims(resource: "https://gallery.furry.cool"),
         })
+      end
+
+      private
+
+      def client
+        @client ||= auth_client_config.logto(self)
       end
     end
   end

@@ -9,13 +9,14 @@ module YiffSpace
 
       include(Enumerable)
 
-      def initialize(perms)
+      def initialize(perms, separator: ":")
         @values = perms
         @tree   = {}
+        @separator = separator
 
         perms.each do |perm|
           current = @tree
-          parts   = perm.split(".")
+          parts   = perm.split(separator)
 
           parts.each do |part|
             current[part] ||= {}
@@ -51,10 +52,10 @@ module YiffSpace
         end
 
         if @tree.key?(str)
-          self.class.new_from_subtree(@tree[str])
+          self.class.new_from_subtree(@tree[str], @separator)
         else
           # return empty node instead of raising
-          self.class.new([])
+          self.class.new([], separator: @separator)
         end
       end
 
@@ -62,10 +63,11 @@ module YiffSpace
         true
       end
 
-      def self.new_from_subtree(tree)
+      def self.new_from_subtree(tree, separator)
         obj = allocate
         obj.instance_variable_set(:@tree, tree)
         obj.instance_variable_set(:@values, leaves_from_tree(tree))
+        obj.instance_variable_set(:@separator, separator)
         obj
       end
 

@@ -1,5 +1,5 @@
 <h1 class="title">Permissions</h1>
-<% if auth? %>
+<% if logged_in? %>
   <% if auth.permissions.any? %>
     <ul class="permissions-list">
       <% auth.permissions.each do |perm| %>

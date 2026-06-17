@@ -3,21 +3,23 @@
 module YiffSpace
   module Auth
     class AuthInfo
-      attr_reader(:id, :token, :entitlements, :roles, :permissions)
+      attr_reader(:id, :token, :roles, :permissions, :client_id)
 
       # @param id String
       # @param roles Array(String)
-      # @param entitlements Array(String)
-      # @param token OpenIDConnect::AccessToken
-      def initialize(id:, entitlements:, roles:, token:)
+      # @param permissions Array(String)
+      # @param token LogtoClient::AccessTokenClaims
+      # @param client_id String
+      def initialize(id:, roles:, permissions:, token:, client_id:)
         raise(ArgumentError, "no id provided") if id.blank?
         raise(ArgumentError, "no token provided") if token.blank?
+        raise(ArgumentError, "no client id provided") if client_id.blank?
 
         @id           = id
         @token        = token
-        @entitlements = Array(entitlements)
         @roles        = Array(roles)
-        @permissions  = Permissions.new(@entitlements)
+        @permissions  = Permissions.new(permissions, separator: YiffSpace::Auth.get_by_id(client_id).permissions_separator)
+        @client_id    = client_id
       end
 
       def anonymous?
@@ -39,10 +41,11 @@ module YiffSpace
 
       def serializable_hash(*)
         {
-          "id"           => id,
-          "token"        => ::YiffSpace::Auth.serialize_token(token),
-          "entitlements" => entitlements,
-          "roles"        => roles,
+          "id"          => id,
+          "token"       => token.as_json,
+          "roles"       => roles,
+          "permissions" => permissions.values,
+          "client_id"   => client_id,
         }
       end
 
@@ -57,10 +60,11 @@ module YiffSpace
         data = ::YiffSpace::Utils::OpenHash.from(data)
 
         new(
-          id:           data.id,
-          token:        ::YiffSpace::Auth.unserialize_token(data.token),
-          entitlements: data.entitlements,
-          roles:        data.roles,
+          id:          data.id,
+          token:       data.token,
+          roles:       data.roles,
+          permissions: data.permissions,
+          client_id:   data.client_id,
         )
       end
 
