@@ -12,8 +12,8 @@ module YiffSpace
       def cb
         client.handle_sign_in_callback(url: request.original_url)
         user = client.fetch_user_info
-        token = client.access_token_claims(resource: auth_client_config.resource)
         self.user = UserInfo.new(id: user["identities"]["discord"]["userId"], user: user, discord: user["identities"]["discord"]["details"]["rawData"])
+        token = client.access_token_claims(resource: auth_client_config.resource)
         self.auth = AuthInfo.new(id: user["identities"]["discord"]["userId"], token: token, permissions: token["scope"].split, roles: user["roles"], client_id: auth_client_config.client_id)
       end
 
@@ -21,7 +21,7 @@ module YiffSpace
 
       def logout
         client.sign_out(post_logout_redirect_uri: request.base_url)
-        reset_user!
+        full_reset!
       end
 
       def debug
@@ -33,7 +33,7 @@ module YiffSpace
           session: session,
           client:  auth_client_config.as_json.merge(client_secret: "[REDACTED]"),
           user:    client.fetch_user_info,
-          token:   client.access_token_claims(resource: "https://gallery.furry.cool"),
+          token:   client.access_token_claims(resource: auth_client_config.resource),
         })
       end
 

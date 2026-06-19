@@ -13,7 +13,7 @@ module YiffSpace
 
       def initialize(name)
         @name                    = name.to_sym
-        @scopes                  = %i[openid offline_access profile roles identities]
+        @scopes                  = %i[openid offline_access profile roles identities custom_data]
         @permissions             = []
         @redirect_uri            = "http://127.0.0.1:3000/auth/cb"
         @server_url              = "https://auth.yiff.space"
