@@ -1,0 +1,78 @@
+# frozen_string_literal: true
+
+require("active_support/core_ext/integer/time")
+require("httparty")
+
+module YiffSpace
+  class LogtoManagementClient
+    attr_reader(:auth)
+
+    def initialize(auth)
+      @auth = auth
+    end
+
+    def get_token # rubocop:disable Naming/AccessorMethodName
+      if @_cached_token
+        return @_cached_token if @_cache_expire_time > Time.current
+
+        @_cached_token = nil
+        @_cache_expire_time = nil
+      end
+      response = HTTParty.post("#{auth.server_url}/oidc/token", {
+        body: {
+          grant_type:    "client_credentials",
+          client_id:     YiffSpace.config.logto_api_client_id,
+          client_secret: YiffSpace.config.logto_api_client_secret,
+          resource:      YiffSpace.config.logto_api_resource,
+          scope:         "all",
+        },
+      })
+      raise("failed to get access token: #{response.to_json}") unless response.key?("access_token")
+
+      @_cached_token = response["access_token"]
+      @_cache_expire_time = response["expires_in"].to_i.seconds.from_now
+      response["access_token"]
+    end
+
+    def get_user(id)
+      response = HTTParty.get("#{auth.server_url}/api/users?discordId=#{id}", { headers: { "Authorization" => "Bearer #{get_token}" } })
+      return nil if response.code == 404 || (response.parsed_response.is_a?(Array) && response.parsed_response.empty?)
+      raise("failed to get user: #{response.code} #{response.message}\n#{response.parsed_response.inspect}") if response.code != 200 || !response.parsed_response.is_a?(Array)
+
+      Utils::TraceLogger.warn("LogtoManagementClient", "query discordId=#{id} returned more than one user:\n#{response.parsed_response.inspect}") if response.parsed_response.length > 1
+
+      Auth::ApiUser.new(response.parsed_response.first)
+    end
+
+    def create_user(id)
+      details = auth.fetch_discord_user(id)&.data
+      raise("invalid discord user: #{id}") if details.blank?
+
+      response = HTTParty.post("#{auth.server_url}/api/users", {
+        headers: { "Authorization" => "Bearer #{get_token}", "Content-Type" => "application/json" },
+        body:    { avatar: "https://cdn.discordapp.com/avatars/#{details['id']}/#{details['avatar']}", username: details["username"] }.to_json,
+      })
+      raise("failed to create user: #{response.code} #{response.message}\n#{response.parsed_response.inspect}") if response.code != 200
+
+      response2 = HTTParty.put("#{auth.server_url}/api/users/#{response.parsed_response['id']}/identities/discord", {
+        headers: { "Authorization" => "Bearer #{get_token}", "Content-Type" => "application/json" },
+        body:    {
+          userId:  details["id"],
+          details: {
+            id:      details["id"],
+            name:    details["username"],
+            avatar:  "https://cdn.discordapp.com/avatars/#{details['id']}/#{details['avatar']}",
+            rawData: details,
+          },
+        }.to_json,
+      })
+      raise("failed to add discord identity: #{response2.code} #{response2.message}\n#{response2.parsed_response.inspect}") if response2.code != 201
+
+      Auth::ApiUser.new(response.parsed_response)
+    end
+
+    def get_or_create_user(id)
+      get_user(id) || create_user(id)
+    end
+  end
+end

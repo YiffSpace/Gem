@@ -3,13 +3,15 @@
 module YiffSpace
   module Auth
     class DiscordInfo
-      ATTRIBUTES = %i[id flags avatar banner locale username avatar_url banner_url global_name mfa_enabled public_flags discriminator].freeze
-      attr_reader(*ATTRIBUTES)
+      # locale, mfa_enabled, and premium_type are not present for legacy users backfilled from api data,
+      # we don't need that data either way
+      ATTRIBUTES = %i[id flags avatar banner username global_name public_flags discriminator].freeze
+      attr_reader(:data, *ATTRIBUTES)
 
       def initialize(options = {}, **kwargs)
-        options = options.merge(kwargs).with_indifferent_access
+        @data = options.merge(kwargs).with_indifferent_access
         ATTRIBUTES.each do |attr|
-          instance_variable_set("@#{attr}", options[attr])
+          instance_variable_set("@#{attr}", @data[attr])
         end
 
         return unless YiffSpace.config.auth.update_discord_images

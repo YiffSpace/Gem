@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative("../core_ext/logto/named_session_storage")
+require("httparty")
 
 module YiffSpace
   module Auth
@@ -37,6 +38,18 @@ module YiffSpace
           # Controller has access to the session object
           storage:  LogtoClient::NamedSessionStorage.new("yiffspace", controller.session, app_id: @name),
         )
+      end
+
+      def logto_management
+        @logto_management ||= LogtoManagementClient.new(self)
+      end
+
+      def fetch_discord_user(id)
+        response = HTTParty.get("https://discord.com/api/v10/users/#{id}", { headers: { "Authorization" => "Bot #{YiffSpace.config.discord_bot_token}" } })
+        return nil if response.code == 404
+        raise("failed to fetch discord user: #{response.code} #{response.message}\n#{response.parsed_response.inspect}") if response.code != 200
+
+        DiscordInfo.new(response.parsed_response)
       end
     end
   end

@@ -31,6 +31,12 @@ module YiffSpace
     # The `last_ip_addr` attribute of the User model, used by the UserResolvableMethods concern
     attr_accessor(:last_ip_addr_attribute)
 
+    # Logto Management API credentials (shared across all auth clients).
+    attr_accessor(:logto_api_client_id, :logto_api_client_secret, :logto_api_resource)
+
+    # Discord bot token used to look up Discord users (shared across all auth clients).
+    attr_accessor(:discord_bot_token)
+
     # The anonymous user's name, can be a proc
     attr_reader(:anonymous_user_name)
 
@@ -43,15 +49,19 @@ module YiffSpace
     attr_writer(:system_user_getter)
 
     def initialize
-      @max_multi_count        = -> { 100 }
-      @redis_url              = -> {}
-      @user_class             = nil
-      @user_like_class        = nil
-      @user_resolvable_class  = nil
-      @current_class          = nil
-      @default_ip_address     = "127.0.0.1"
-      @last_ip_addr_attribute = :last_ip_addr
-      @anonymous_user_name    = -> { "Anonymous" }
+      @max_multi_count         = -> { 100 }
+      @redis_url               = -> {}
+      @user_class              = nil
+      @user_like_class         = nil
+      @user_resolvable_class   = nil
+      @current_class           = nil
+      @default_ip_address      = "127.0.0.1"
+      @last_ip_addr_attribute  = :last_ip_addr
+      @anonymous_user_name     = -> { "Anonymous" }
+      @logto_api_client_id     = nil
+      @logto_api_client_secret = nil
+      @logto_api_resource      = nil
+      @discord_bot_token       = nil
     end
 
     def user_class
