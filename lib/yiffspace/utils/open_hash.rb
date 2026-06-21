@@ -46,6 +46,15 @@ module YiffSpace
         oh
       end
 
+      def marshal_dump
+        [to_h, @respond_to_missing]
+      end
+
+      def marshal_load(data)
+        hash, @respond_to_missing = data
+        replace(hash)
+      end
+
       def self.from_array(items, **)
         items.map { |item| from(item, **) }
       end
