@@ -9,7 +9,7 @@ module YiffSpace
         @data = Utils::OpenHash.from(data)
       end
 
-      delegate(:id, to: :data)
+      delegate(:id, :username, to: :data)
 
       def discord_id
         data.identities.discord.userId
@@ -28,7 +28,7 @@ module YiffSpace
       end
 
       def discord
-        data.identities.discord.details.blank? ? nil : DiscordInfo.new(data.identities.discord.details.rawData)
+        DiscordInfo.new(data.identities.discord.details.rawData)
       end
 
       def avatar
