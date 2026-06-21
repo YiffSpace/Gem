@@ -50,7 +50,7 @@ module YiffSpace
 
       response = HTTParty.post("#{auth.server_url}/api/users", {
         headers: { "Authorization" => "Bearer #{get_token}", "Content-Type" => "application/json" },
-        body:    { avatar: "https://cdn.discordapp.com/avatars/#{details['id']}/#{details['avatar']}", username: details["username"] }.to_json,
+        body:    { avatar: "https://cdn.discordapp.com/avatars/#{details['id']}/#{details['avatar']}", name: details["username"] }.to_json,
       })
       raise("failed to create user: #{response.code} #{response.message}\n#{response.parsed_response.inspect}") if response.code != 200
 

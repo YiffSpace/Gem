@@ -9,7 +9,7 @@ module YiffSpace
         @data = Utils::OpenHash.from(data)
       end
 
-      delegate(:id, :username, to: :data)
+      delegate(:id, :name, to: :data)
 
       def discord_id
         data.identities.discord.userId
