@@ -2,6 +2,7 @@
 
 YiffSpace::Auth::Engine.routes.draw do
   constraints(YiffSpace::Auth::SetClientName.default) do
+    post(:webhook, controller: :webhook)
     get(:cb, controller: :root)
     get(:logout, controller: :root)
     get(:permissions, controller: :root)

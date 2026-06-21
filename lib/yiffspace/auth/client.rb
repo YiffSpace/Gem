@@ -8,7 +8,8 @@ module YiffSpace
     class Client
       attr_accessor(:client_id, :client_secret, :scopes, :permissions,
                     :resource, :redirect_uri, :server_url, :auth_session_key,
-                    :user_session_key, :update_discord_images, :permissions_separator)
+                    :user_session_key, :update_discord_images, :permissions_separator,
+                    :logto_webhook_secret)
 
       attr_reader(:name)
 
@@ -22,6 +23,7 @@ module YiffSpace
         @user_session_key        = :"yiffspace_user_#{name}"
         @update_discord_images   = true
         @permissions_separator   = ":"
+        @logto_webhook_secret    = nil
       end
 
       def logto(controller)

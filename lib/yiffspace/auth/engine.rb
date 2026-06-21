@@ -41,6 +41,7 @@ module YiffSpace
             subclass.routes.default_scope = { module: "yiff_space/auth" }
             subclass.routes.draw do
               constraints(SetClientName.new(name)) do
+                post(:webhook, controller: :webhook)
                 get(:cb, controller: :root)
                 get(:logout, controller: :root)
                 get(:permissions, controller: :root)

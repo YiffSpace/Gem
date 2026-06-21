@@ -5,6 +5,8 @@ module YiffSpace
     class RootController < ApplicationController
       include(Helper)
 
+      before_action(:sync_auth_if_dirty!)
+
       def show
         client.sign_in(redirect_uri: auth_client_config.redirect_uri, post_redirect_uri: params[:path] || "/")
       end

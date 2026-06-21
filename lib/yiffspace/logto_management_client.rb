@@ -74,5 +74,34 @@ module YiffSpace
     def get_or_create_user(id)
       get_user(id) || create_user(id)
     end
+
+    def get_user_by_id(logto_id)
+      response = HTTParty.get("#{auth.server_url}/api/users/#{logto_id}", { headers: { "Authorization" => "Bearer #{get_token}" } })
+      return nil if response.code == 404
+      raise("failed to get user: #{response.code} #{response.message}\n#{response.parsed_response.inspect}") if response.code != 200
+
+      Auth::ApiUser.new(response.parsed_response)
+    end
+
+    def get_user_roles(logto_id)
+      response = HTTParty.get("#{auth.server_url}/api/users/#{logto_id}/roles", { headers: { "Authorization" => "Bearer #{get_token}" } })
+      raise("failed to get user roles: #{response.code} #{response.message}\n#{response.parsed_response.inspect}") if response.code != 200
+
+      response.parsed_response
+    end
+
+    def get_role_scopes(role_id)
+      response = HTTParty.get("#{auth.server_url}/api/roles/#{role_id}/scopes", { headers: { "Authorization" => "Bearer #{get_token}" } })
+      raise("failed to get role scopes: #{response.code} #{response.message}\n#{response.parsed_response.inspect}") if response.code != 200
+
+      response.parsed_response
+    end
+
+    def get_users_with_role(role_id)
+      response = HTTParty.get("#{auth.server_url}/api/roles/#{role_id}/users", { headers: { "Authorization" => "Bearer #{get_token}" } })
+      raise("failed to get users with role: #{response.code} #{response.message}\n#{response.parsed_response.inspect}") if response.code != 200
+
+      response.parsed_response
+    end
   end
 end

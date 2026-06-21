@@ -78,17 +78,53 @@ module YiffSpace
       end
 
       def require_auth(path)
-        redirect_to(path) unless user?
+        redirect_to(path) unless logged_in?
       end
 
       def logged_in?
-        user?
+        auth? && user?
       end
 
       def has_permission?(name)
-        return false unless user?
+        return false unless logged_in?
 
         auth.permissions.has?(name)
+      end
+
+      DIRTY_FLAG_KEY = "yiffspace:auth:dirty:%s"
+
+      # Checks the dirty flag written by the Logto webhook handler. If set, re-fetches
+      # the user's current roles and permissions from the Logto Management API and
+      # rewrites the session — without waiting for the access token to expire.
+      # Call this as a before_action in any controller that needs instant revocation.
+      def sync_auth_if_dirty!
+        return unless auth?
+
+        flag_key = format(DIRTY_FLAG_KEY, auth.id)
+        return unless Rails.cache.exist?(flag_key)
+
+        Rails.cache.delete(flag_key)
+
+        management = auth_client_config.logto_management
+        api_user   = management.get_user_by_id(auth.id)
+
+        if api_user.nil? || api_user.data["isSuspended"]
+          full_reset!
+          return
+        end
+
+        roles       = management.get_user_roles(auth.id)
+        permissions = roles.flat_map { |role| management.get_role_scopes(role["id"]) }
+                           .pluck("name")
+                           .uniq
+
+        self.auth = AuthInfo.new(
+          id:          auth.id,
+          token:       auth.token,
+          roles:       roles.pluck("name"),
+          permissions: permissions,
+          client_id:   auth.client_id,
+        )
       end
 
       def url_helpers
