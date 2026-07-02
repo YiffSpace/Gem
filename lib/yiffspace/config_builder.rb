@@ -1,16 +1,18 @@
 # frozen_string_literal: true
 
+require("active_support/hash_with_indifferent_access")
+
 # This is intended to only be used externally, it is NOT reusable, do not use it within this project, or attempt to use it multiple times!!
 module YiffSpace
   class ConfigBuilder
     include(Singleton)
 
     cattr_accessor(:list, default: [])
-    cattr_accessor(:env_set, default: {})
+    cattr_accessor(:env_set, default: ActiveSupport::HashWithIndifferentAccess.new)
     cattr_accessor(:unset, default: [])
     cattr_accessor(:required, default: [])
-    cattr_accessor(:reviver_map, default: {})
-    cattr_accessor(:subconfigs, default: Hash.new { |h, k| h[k] = {} })
+    cattr_accessor(:reviver_map, default: ActiveSupport::HashWithIndifferentAccess.new)
+    cattr_accessor(:subconfigs, default: ActiveSupport::HashWithIndifferentAccess.new { |h, k| h[k] = {} })
     cattr_accessor(:env_name, default: "CONFIG")
 
     def self.config(name, type = :string, env: true, required: false, blank: false, &block)
@@ -61,6 +63,7 @@ module YiffSpace
     end
 
     def self.reviver(name, type = nil, &block)
+      name = name.to_sym
       if block
         reviver_map[name] = block
         return
@@ -68,7 +71,7 @@ module YiffSpace
       method            = case type
                           when :boolean
                             ->(v) { !v.match?(/\A(false|f|no|n|off|0)\z/i) }
-                          when :integer
+                          when :integer, :number
                             ->(v) { v.to_i }
                           when :symbol
                             ->(v) { v.to_sym }
