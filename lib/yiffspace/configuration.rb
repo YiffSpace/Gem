@@ -114,6 +114,10 @@ module YiffSpace
       YiffSpace::Auth.register(name, &)
     end
 
+    def add_default_auth(&)
+      add_auth(Auth::DEFAULT_CLIENT_NAME, &)
+    end
+
     def images
       @images ||= Images.new
     end

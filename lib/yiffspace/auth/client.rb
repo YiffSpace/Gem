@@ -6,17 +6,15 @@ require("httparty")
 module YiffSpace
   module Auth
     class Client
-      attr_accessor(:client_id, :client_secret, :scopes, :permissions,
-                    :resource, :redirect_uri, :server_url, :auth_session_key,
-                    :user_session_key, :update_discord_images, :permissions_separator,
-                    :logto_webhook_secret)
+      attr_accessor(:client_id, :client_secret, :scopes, :resource,
+                    :redirect_uri, :server_url, :auth_session_key, :user_session_key,
+                    :update_discord_images, :permissions_separator, :logto_webhook_secret)
 
       attr_reader(:name)
 
       def initialize(name)
         @name                    = name.to_sym
         @scopes                  = %i[openid offline_access profile roles identities custom_data]
-        @permissions             = []
         @redirect_uri            = "http://127.0.0.1:3000/auth/cb"
         @server_url              = "https://auth.yiff.space"
         @auth_session_key        = :"yiffspace_auth_#{name}"
