@@ -68,7 +68,7 @@ module YiffSpace
       })
       raise("failed to add discord identity: #{response2.code} #{response2.message}\n#{response2.parsed_response.inspect}") if response2.code != 201
 
-      Auth::ApiUser.new(response.parsed_response)
+      get_user(id) # force fresh fetch to ensure identity data is included properly
     end
 
     def get_or_create_user(id)
