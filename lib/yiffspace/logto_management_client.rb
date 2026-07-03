@@ -75,6 +75,35 @@ module YiffSpace
       get_user(id) || create_user(id)
     end
 
+    # Pages through every user in the tenant. Used by maintenance tasks (e.g. the
+    # dedupe_users rake task) - there's no discordId to filter by when scanning the
+    # whole user base for duplicates/orphans.
+    def list_users(page_size: 100)
+      users = []
+      page = 1
+      loop do
+        response = HTTParty.get("#{auth.server_url}/api/users", {
+          headers: { "Authorization" => "Bearer #{get_token}" },
+          query:   { page: page, page_size: page_size },
+        })
+        raise("failed to list users: #{response.code} #{response.message}\n#{response.parsed_response.inspect}") if response.code != 200 || !response.parsed_response.is_a?(Array)
+
+        batch = response.parsed_response
+        users.concat(batch.map { |u| Auth::ApiUser.new(u) })
+        break if batch.length < page_size
+
+        page += 1
+      end
+      users
+    end
+
+    def delete_user(logto_id)
+      response = HTTParty.delete("#{auth.server_url}/api/users/#{logto_id}", { headers: { "Authorization" => "Bearer #{get_token}" } })
+      return true if [204, 404].include?(response.code)
+
+      raise("failed to delete user #{logto_id}: #{response.code} #{response.message}\n#{response.parsed_response.inspect}")
+    end
+
     def get_user_by_id(logto_id)
       response = HTTParty.get("#{auth.server_url}/api/users/#{logto_id}", { headers: { "Authorization" => "Bearer #{get_token}" } })
       return nil if response.code == 404
