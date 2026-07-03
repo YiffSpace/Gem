@@ -30,7 +30,7 @@ module YiffSpace
             endpoint:   server_url,
             app_id:     client_id,
             app_secret: client_secret,
-            scopes:     scopes + permissions,
+            scopes:     scopes,
             resources:  [resource].compact,
           ),
           # Allow the client to redirect to other hosts (i.e. your Logto tenant)
