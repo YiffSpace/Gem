@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-namespace(:yiff_space) do
+namespace(:yiffspace) do
   desc("Report and interactively remove duplicate/orphaned Logto users left behind by " \
        "get_or_create_user races. Prompts for confirmation before deleting each one. " \
        "Pass AUTH_CLIENT=name to use a registered auth client other than :default " \
