@@ -1,10 +1,9 @@
 PATH
   remote: .
   specs:
-    yiffspace (0.0.25)
+    yiffspace (0.1.0)
       abbrev (>= 0.1.2)
       httparty (>= 0.24)
-      logto (>= 0.2.0)
       rails (>= 7.1)
       request_store (>= 1.7)
       zeitwerk (>= 2.6)
@@ -115,13 +114,9 @@ GEM
       rdoc (>= 4.0.0)
       reline (>= 0.4.2)
     json (2.19.4)
-    jwt (2.10.3)
-      base64
     language_server-protocol (3.17.0.5)
     lint_roller (1.1.0)
     logger (1.7.0)
-    logto (0.2.0)
-      jwt (~> 2.8)
     loofah (2.25.1)
       crass (~> 1.0.2)
       nokogiri (>= 1.12.0)
@@ -314,11 +309,9 @@ CHECKSUMS
   io-console (0.8.2) sha256=d6e3ae7a7cc7574f4b8893b4fca2162e57a825b223a177b7afa236c5ef9814cc
   irb (1.18.0) sha256=de9454a0703a54704b9811a5ef31a60c86949fbf4013fcf244fabc7c775248e3
   json (2.19.4) sha256=670a7d333fb3b18ca5b29cb255eb7bef099e40d88c02c80bd42a3f30fe5239ac
-  jwt (2.10.3) sha256=e4d9352fbc7309b1a7448c7dd713dfe4d8c47077af80759cdbed8f878ea0b484
   language_server-protocol (3.17.0.5) sha256=fd1e39a51a28bf3eec959379985a72e296e9f9acfce46f6a79d31ca8760803cc
   lint_roller (1.1.0) sha256=2c0c845b632a7d172cb849cc90c1bce937a28c5c8ccccb50dfd46a485003cc87
   logger (1.7.0) sha256=196edec7cc44b66cfb40f9755ce11b392f21f7967696af15d274dde7edff0203
-  logto (0.2.0) sha256=185b863c23495f0dcd7de749724a42c97377712acb0b33368ad6cccdc193558a
   loofah (2.25.1) sha256=d436c73dbd0c1147b16c4a41db097942d217303e1f7728704b37e4df9f6d2e04
   mail (2.9.0) sha256=6fa6673ecd71c60c2d996260f9ee3dd387d4673b8169b502134659ece6d34941
   marcel (1.1.0) sha256=fdcfcfa33cc52e93c4308d40e4090a5d4ea279e160a7f6af988260fa970e0bee
@@ -374,7 +367,7 @@ CHECKSUMS
   useragent (0.16.11) sha256=700e6413ad4bb954bb63547fa098dddf7b0ebe75b40cc6f93b8d54255b173844
   websocket-driver (0.8.0) sha256=ed0dba4b943c22f17f9a734817e808bc84cdce6a7e22045f5315aa57676d4962
   websocket-extensions (0.1.5) sha256=1c6ba63092cda343eb53fc657110c71c754c56484aad42578495227d717a8241
-  yiffspace (0.0.25)
+  yiffspace (0.1.0)
   zeitwerk (2.7.5) sha256=d8da92128c09ea6ec62c949011b00ed4a20242b255293dd66bf41545398f73dd
 
 BUNDLED WITH

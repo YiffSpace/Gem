@@ -31,12 +31,6 @@ module YiffSpace
     # The `last_ip_addr` attribute of the User model, used by the UserResolvableMethods concern
     attr_accessor(:last_ip_addr_attribute)
 
-    # Logto Management API credentials (shared across all auth clients).
-    attr_accessor(:logto_api_client_id, :logto_api_client_secret, :logto_api_resource)
-
-    # Discord bot token used to look up Discord users (shared across all auth clients).
-    attr_accessor(:discord_bot_token)
-
     # The anonymous user's name, can be a proc
     attr_reader(:anonymous_user_name)
 
@@ -58,10 +52,6 @@ module YiffSpace
       @default_ip_address      = "127.0.0.1"
       @last_ip_addr_attribute  = :last_ip_addr
       @anonymous_user_name     = -> { "Anonymous" }
-      @logto_api_client_id     = nil
-      @logto_api_client_secret = nil
-      @logto_api_resource      = nil
-      @discord_bot_token       = nil
     end
 
     def user_class
@@ -101,21 +91,6 @@ module YiffSpace
 
     def anonymous_user_name=(value)
       @anonymous_user_name = value.is_a?(Proc) ? value : -> { value }
-    end
-
-    def auth(&block)
-      client = YiffSpace::Auth.register(Auth::DEFAULT_CLIENT_NAME) unless YiffSpace::Auth.instance_variable_get(:@clients).key?(Auth::DEFAULT_CLIENT_NAME)
-      client ||= YiffSpace::Auth[Auth::DEFAULT_CLIENT_NAME]
-      block&.call(client)
-      client
-    end
-
-    def add_auth(name, &)
-      YiffSpace::Auth.register(name, &)
-    end
-
-    def add_default_auth(&)
-      add_auth(Auth::DEFAULT_CLIENT_NAME, &)
     end
 
     def images

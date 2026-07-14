@@ -23,17 +23,17 @@ module YiffSpace
         # https://www.postgresql.org/docs/current/static/functions-matching.html#FUNCTIONS-POSIX-REGEXP
         # "(?e)" means force use of ERE syntax; see sections 9.7.3.1 and 9.7.3.4.
         def regex(conditions = {}, flags: "e", **kwargs)
-          conditions.merge!(kwargs) if conditions.is_a?(Hash)
+          conditions.merge!(kwargs) if conditions.is_a?(::Hash)
           build(conditions, :regex, flags)
         end
 
         def not_regex(conditions = {}, flags: "e", **kwargs)
-          conditions.merge!(kwargs) if conditions.is_a?(Hash)
+          conditions.merge!(kwargs) if conditions.is_a?(::Hash)
           build(conditions, :not_regex, flags)
         end
 
         def tsquery(conditions = {}, ts_config: "english", **kwargs)
-          conditions.merge!(kwargs) if conditions.is_a?(Hash)
+          conditions.merge!(kwargs) if conditions.is_a?(::Hash)
           build(conditions, :tsquery, ts_config)
         end
 
@@ -84,9 +84,9 @@ module YiffSpace
 
           conditions.each do |key, value|
             case key
-            when String, Symbol
+            when ::String, ::Symbol
               key = key.to_s
-              if value.is_a?(Hash)
+              if value.is_a?(::Hash)
                 pairs.concat(normalize_conditions(value, model, key))
               elsif key.include?(".")
                 table, col = key.split(".", 2)

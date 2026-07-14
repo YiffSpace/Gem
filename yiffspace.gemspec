@@ -20,12 +20,11 @@ Gem::Specification.new do |spec|
   spec.metadata["rubygems_mfa_required"] = "true"
 
   spec.files = Dir.chdir(File.expand_path(__dir__)) do
-    Dir["{app,config,db,engines,lib}/**/*", "LICENSE", "Rakefile", "README.md", "CHANGELOG.md"]
+    Dir["{app,config,db,lib}/**/*", "LICENSE", "Rakefile", "README.md", "CHANGELOG.md"]
   end
 
   spec.add_dependency("abbrev", ">= 0.1.2")
   spec.add_dependency("httparty", ">= 0.24")
-  spec.add_dependency("logto", ">= 0.2.0")
   spec.add_dependency("rails", ">= 7.1")
   spec.add_dependency("request_store", ">= 1.7")
   spec.add_dependency("zeitwerk", ">= 2.6")

@@ -1,18 +1,20 @@
 # frozen_string_literal: true
 
+require("rails")
+
 module YiffSpace
-  class Railtie < Rails::Railtie
+  class Engine < ::Rails::Engine
+    config.root = File.expand_path("../..", __dir__)
+
+    initializer("yiffspace.assets") do |app|
+      app.config.assets.precompile += %w[yiffspace/application.css] if app.config.respond_to?(:assets)
+    end
+
     initializer("yiffspace.serializers") do
       ActiveSupport.on_load(:active_job) do
         ActiveJob::Serializers.add_serializers(
-          Serializers::AnonymousAuthInfoSerializer,
-          Serializers::AnonymousUserInfoSerializer,
-          Serializers::AuthInfoSerializer,
           Serializers::AvatarSerializer,
           Serializers::BannerSerializer,
-          Serializers::DiscordInfoSerializer,
-          Serializers::PermissionsSerializer,
-          Serializers::UserInfoSerializer,
           Serializers::UserResolvableSerializer,
         )
       end

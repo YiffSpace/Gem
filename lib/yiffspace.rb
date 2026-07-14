@@ -20,12 +20,11 @@ loader = Zeitwerk::Loader.for_gem
 loader.inflector.inflect({ "postgresql" => "PostgreSQL", "yiffspace" => "YiffSpace", "query_dsl" => "QueryDSL" })
 loader.ignore("#{__dir__}/yiffspace/core_ext")
 loader.ignore("#{__dir__}/yiffspace/include")
-loader.ignore("#{__dir__}/yiffspace/railtie.rb")
-loader.ignore("#{__dir__}/yiffspace/auth/engine.rb")
+loader.ignore("#{__dir__}/yiffspace/engine.rb")
 loader.setup
 
-# Require the auth engine eagerly so it registers with Rails before the host app's
+# Require the engine eagerly so it registers with Rails before the host app's
 # active_support.initialize_per_engine_zeitwerk_loaders initializer runs. Without this,
-# the engine is only loaded during route drawing (after Zeitwerk setup) and its
-# app/controllers path is never added to the app's autoload roots.
-require_relative("yiffspace/auth/engine") if defined?(Rails)
+# the engine is only loaded lazily (after Zeitwerk setup) and its app/controllers
+# path is never added to the app's autoload roots.
+require_relative("yiffspace/engine") if defined?(Rails)
