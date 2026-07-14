@@ -7,7 +7,7 @@ module YiffSpace
         module PostgreSQL
           module LeftJoinLateral
             # noinspection RubyInstanceMethodNamingConvention
-            def visit_Arel_Nodes_LeftJoinLateral(o, collector)
+            def visit_YiffSpace_Extensions_Arel_Nodes_LeftJoinLateral(o, collector)
               collector << "LEFT JOIN LATERAL "
               visit(o.left, collector)
               return unless o.right

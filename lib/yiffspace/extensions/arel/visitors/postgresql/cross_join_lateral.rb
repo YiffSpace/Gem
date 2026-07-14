@@ -7,7 +7,7 @@ module YiffSpace
         module PostgreSQL
           module CrossJoinLateral
             # noinspection RubyInstanceMethodNamingConvention
-            def visit_Arel_Nodes_CrossJoinLateral(o, collector)
+            def visit_YiffSpace_Extensions_Arel_Nodes_CrossJoinLateral(o, collector)
               collector << "CROSS JOIN LATERAL "
               visit(o.left, collector)
             end
