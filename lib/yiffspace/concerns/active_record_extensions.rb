@@ -30,13 +30,13 @@ module YiffSpace
         end
 
         # CrossJoinLateral, LeftJoinLateral, nil
-        def unnest(column, name: column.singularize, type: Arel::Nodes::LeftJoinLateral)
-          function = Arel::Nodes::NamedFunction.new("unnest", [arel(column)], name)
+        def unnest(column, name: column.singularize, type: ::Arel::Nodes::LeftJoinLateral)
+          function = ::Arel::Nodes::NamedFunction.new("unnest", [arel(column)], name)
           return function if type.nil?
 
           joins(type.new(
                   function,
-                  Arel::Nodes::On.new(Arel.sql("TRUE")),
+                  ::Arel::Nodes::On.new(Arel.sql("TRUE")),
                 ))
         end
       end
