@@ -42,6 +42,14 @@ module YiffSpace
     # Default: -> { (user_class || ::User).system }
     attr_writer(:system_user_getter)
 
+    # The application's ApplicationRecord class. Used by Concerns::ActiveRecordExtensions & Utils::TableBuilder.
+    # Falls back to ::ApplicationRecord at call time when nil.
+    attr_writer(:application_record_class)
+
+    # The application's ApplicationController class. Used by Utils::Helpers & Utils::TableBuilder.
+    # Falls back to ::ApplicationController at call time when nil.
+    attr_writer(:application_controller_class)
+
     def initialize
       @max_multi_count         = -> { 100 }
       @redis_url               = -> {}
@@ -91,6 +99,14 @@ module YiffSpace
 
     def anonymous_user_name=(value)
       @anonymous_user_name = value.is_a?(Proc) ? value : -> { value }
+    end
+
+    def application_record_class
+      @application_record_class || ::ApplicationRecord
+    end
+
+    def application_controller_class
+      @application_controller_class || ::ApplicationController
     end
 
     def images

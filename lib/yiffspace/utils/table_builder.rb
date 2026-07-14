@@ -123,12 +123,12 @@ module YiffSpace
       # @param _row [Integer] the row number (unused)
       # @return [Hash] the <tr> attributes
       def all_row_attributes(item, _row)
-        return {} unless item.is_a?(ApplicationRecord)
+        return {} unless item.is_a?(YiffSpace.config.application_record_class)
 
         {
           id: "#{item.model_name.singular.dasherize}-#{item.id}",
           **row_attributes,
-          **ApplicationController.helpers.data_attributes_for(item),
+          **YiffSpace.config.application_controller_class.helpers.data_attributes_for(item),
         }
       end
     end

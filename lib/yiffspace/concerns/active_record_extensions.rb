@@ -26,7 +26,7 @@ module YiffSpace
         end
 
         def statement_timeout
-          ApplicationRecord.connection.select_one("SELECT setting FROM pg_settings WHERE name = 'statement_timeout'")["setting"].to_i
+          YiffSpace.config.application_record_class.connection.select_one("SELECT setting FROM pg_settings WHERE name = 'statement_timeout'")["setting"].to_i
         end
 
         # CrossJoinLateral, LeftJoinLateral, nil
