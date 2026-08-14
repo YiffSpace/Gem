@@ -13,8 +13,6 @@ module YiffSpace
         Auth::DiscordInfo.from_json(arg)
       end
 
-      private
-
       def klass
         Auth::DiscordInfo
       end

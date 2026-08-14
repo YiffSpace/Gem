@@ -13,8 +13,6 @@ module YiffSpace
         Auth::Permissions.new(arg["value"])
       end
 
-      private
-
       def klass
         Auth::Permissions
       end

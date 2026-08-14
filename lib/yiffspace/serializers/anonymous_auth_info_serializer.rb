@@ -13,8 +13,6 @@ module YiffSpace
         Auth::AuthInfo::Anonymous.instance
       end
 
-      private
-
       def klass
         Auth::AuthInfo::Anonymous
       end

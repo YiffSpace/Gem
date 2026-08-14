@@ -13,8 +13,6 @@ module YiffSpace
         Auth::UserInfo.from_json(arg)
       end
 
-      private
-
       def klass
         Auth::UserInfo
       end
