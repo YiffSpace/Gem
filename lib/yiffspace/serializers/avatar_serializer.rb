@@ -13,8 +13,6 @@ module YiffSpace
         Images::Avatar::Base.from_json(arg)
       end
 
-      private
-
       def klass
         Images::Avatar::Base
       end

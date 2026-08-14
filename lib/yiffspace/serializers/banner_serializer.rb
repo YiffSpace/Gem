@@ -13,8 +13,6 @@ module YiffSpace
         Images::Banner::Base.from_json(arg)
       end
 
-      private
-
       def klass
         Images::Banner::Base
       end
