@@ -65,8 +65,12 @@ module YiffSpace
         # @return [#to_s] the value of the table cell
         def value(item, row, column)
           if block.present?
-            block.call(item, row, column, self)
-            nil
+            view = block.binding.receiver
+            if view.respond_to?(:capture)
+              view.capture { block.call(item, row, column, self) }
+            else
+              block.call(item, row, column, self)
+            end
           elsif attribute.is_a?(Symbol)
             item.send(attribute)
           else
