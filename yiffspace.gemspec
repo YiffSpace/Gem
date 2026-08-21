@@ -25,7 +25,7 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency("abbrev", ">= 0.1.2")
   spec.add_dependency("httparty", ">= 0.24")
-  spec.add_dependency("rails", ">= 7.1")
+  spec.add_dependency("rails", ">= 8.1")
   spec.add_dependency("request_store", ">= 1.7")
   spec.add_dependency("zeitwerk", ">= 2.6")
 end
