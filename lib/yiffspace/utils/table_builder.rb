@@ -79,6 +79,29 @@ module YiffSpace
         end
       end
 
+      # Represents a custom row in the table body.
+      class Row
+        attr_reader(:block, :row_attributes)
+
+        def initialize(row_attributes = {}, &block)
+          @row_attributes = row_attributes
+          @block = block
+        end
+
+        def custom?
+          true
+        end
+
+        def value(index)
+          view = block.binding.receiver
+          if view.respond_to?(:capture)
+            view.capture { block.call(index, self) }
+          else
+            block.call(index, self)
+          end
+        end
+      end
+
       attr_reader(:columns, :table_attributes, :row_attributes, :items)
 
       # Build a table for an array of objects, one object per row.
@@ -122,11 +145,17 @@ module YiffSpace
         @columns << Column.new(*, **options, &)
       end
 
+      def row(row_attributes = {}, &)
+        @items = @items.to_a unless @items.is_a?(Array)
+        @items << Row.new(row_attributes, &)
+      end
+
       # Return the HTML attributes for each <tr> tag.
       # @param item [ApplicationRecord] the item for this row
       # @param _row [Integer] the row number (unused)
       # @return [Hash] the <tr> attributes
       def all_row_attributes(item, _row)
+        return item.row_attributes if item.is_a?(Row)
         return {} unless item.is_a?(YiffSpace.config.application_record_class)
 
         {
