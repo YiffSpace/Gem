@@ -8,6 +8,7 @@ gemspec
 
 gem("puma")
 
+gem("pg")
 gem("sqlite3")
 
 gem("sprockets-rails")
