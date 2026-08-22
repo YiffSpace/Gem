@@ -21,6 +21,7 @@ loader.inflector.inflect({ "postgresql" => "PostgreSQL", "yiffspace" => "YiffSpa
 loader.ignore("#{__dir__}/yiffspace/core_ext")
 loader.ignore("#{__dir__}/yiffspace/include")
 loader.ignore("#{__dir__}/yiffspace/engine.rb")
+loader.ignore("#{__dir__}/generators")
 loader.setup
 
 # Require the engine eagerly so it registers with Rails before the host app's

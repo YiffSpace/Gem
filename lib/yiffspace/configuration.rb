@@ -112,5 +112,19 @@ module YiffSpace
     def images
       @images ||= Images.new
     end
+
+    # Named `--steps` presets for `bin/rails generate yiffspace:fixer`. See
+    # YiffSpace::Configuration::FixerTemplates.
+    def fixer_templates
+      @fixer_templates ||= FixerTemplates.new
+    end
+
+    # Directory scanned for YiffSpace::FixerTemplate subclasses (see FixerTemplate) - defaults to
+    # db/fixer_templates in the host app.
+    attr_writer(:fixer_templates_path)
+
+    def fixer_templates_path
+      @fixer_templates_path ||= Rails.root.join("db/fixer_templates")
+    end
   end
 end

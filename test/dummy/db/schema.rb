@@ -12,7 +12,16 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 20_260_821_065_127) do
+ActiveRecord::Schema[8.1].define(version: 20_260_822_004_454) do
+  # These are extensions that must be enabled in order to support this database
+  enable_extension("pg_catalog.plpgsql")
+
+  create_table("fixes", id: false, force: :cascade) do |t|
+    t.integer("id", null: false)
+    t.integer("index")
+    t.index(%w[id index], name: "index_fixes_on_id_and_index", unique: true, nulls_not_distinct: true)
+  end
+
   create_table("tests", force: :cascade) do |t|
     t.datetime("created_at", null: false)
     t.datetime("updated_at", null: false)

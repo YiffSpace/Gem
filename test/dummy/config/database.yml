@@ -26,9 +26,22 @@ development:
 # Warning: The database defined as "test" will be erased and
 # re-generated from your development database when you run "rake".
 # Do not set this db to the same as development or production.
+#
+# Postgres, not sqlite: the fixes table's `nulls_not_distinct` unique index (see
+# db/migrate/*_create_fixes.rb) is a Postgres-only concept that sqlite silently drops when
+# dumping schema.rb, since it has nothing to introspect it back from.
+#
+# `docker compose up postgres` (see docker-compose.yml) brings up a matching database on
+# 127.127.127.127:5432. Override POSTGRES_HOST/POSTGRES_PORT to point at a different one instead.
 test:
-  <<: *sqlite
-  database: storage/test.sqlite3
+  adapter: postgresql
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  encoding: unicode
+  host: <%= ENV.fetch("POSTGRES_HOST") { "127.127.127.127" } %>
+  port: <%= ENV.fetch("POSTGRES_PORT") { 5432 } %>
+  username: postgres
+  password: postgres
+  database: yiffspace_gem_test
 
 production:
   <<: *sqlite

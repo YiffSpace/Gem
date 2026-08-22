@@ -1,0 +1,40 @@
+Description:
+    Generates a new one-time fix script tracked by YiffSpace::FixTracker.
+
+Example:
+    bin/rails generate yiffspace:fixer fixer_name
+
+    This will create:
+        db/fixes/<id>_fixer_name.rb
+
+    bin/rails generate yiffspace:fixer fixer_name --steps 2
+
+    This will create:
+        db/fixes/<id>_1_fixer_name.rb
+        db/fixes/<id>_2_fixer_name.rb
+
+    A host app can define named templates, auto-discovered from db/fixer_templates/*.rb (see
+    YiffSpace::FixerTemplate and YiffSpace.config.fixer_templates_path) - no registration needed,
+    just define a subclass. Each `step` block's return value becomes that step's file content:
+
+        # db/fixer_templates/elasticsearch_template.rb
+        class ElasticsearchTemplate < YiffSpace::FixerTemplate
+          short("e")
+
+          step { "# add the elasticsearch index\n" }
+          step { "# backfill the elasticsearch data\n" }
+        end
+
+    bin/rails generate yiffspace:fixer fixer_name --template elasticsearch
+    bin/rails generate yiffspace:fixer fixer_name -t elasticsearch
+    bin/rails generate yiffspace:fixer fixer_name -e
+
+    All three create the 2 steps above; `short` is optional - a template is always reachable via
+    --template/-t, the shortname flag is just a convenience.
+
+    A host app can also register a preset with just a step count (no per-step content - every
+    step falls back to the generic fixer.rb template) directly in an initializer instead:
+
+        YiffSpace.configure do |config|
+          config.fixer_templates.register(:legacy, steps: 3)
+        end
