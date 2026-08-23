@@ -19,8 +19,23 @@ module YiffSpace
     CLIENT_NAME_ENV     = "yiffspace.auth.client_name"
     DEFAULT_CLIENT_NAME = :default
 
+    # Per-request override of spoof auth, keyed off the request env like CLIENT_NAME_ENV is - see
+    # Helper#spoof_override/#spoof_override= below. `false` disables spoofing outright; a Hash
+    # overrides individual :spoof_user_id/:spoof_permissions/:spoof_roles values.
+    SPOOF_OVERRIDE_ENV = "yiffspace.auth.spoof_override"
+
+    # auth/user session values (raw Discord profile + OIDC token claims) can easily exceed a
+    # cookie's ~4KB limit, so the session cookie itself only holds an opaque pointer - the real
+    # payload lives in Rails.cache (already a hard dependency of Helper, see
+    # Helper#sync_auth_if_dirty! below), keyed off that pointer.
+    SESSION_CACHE_KEY = "yiffspace:auth:session:%s"
+    SESSION_CACHE_TTL = 30.days
+
+    DIRTY_FLAG_KEY = "yiffspace:auth:dirty:%s"
+
     @clients             = {}
     @enable_debug_action = false
+    @spoof_auth          = false
 
     module_function
 
@@ -53,6 +68,23 @@ module YiffSpace
 
     def disable_debug_action!
       @enable_debug_action = false
+    end
+
+    # Global kill switch for auth spoofing. When enabled, any client with a
+    # `spoof_user_id` configured logs every request in as that user instead of
+    # reading the real session - see Helper#auth/#user. There's no environment
+    # check here (mirrors enable_debug_action!) - it's on the host app to only
+    # ever call this from somewhere gated to development.
+    def spoof_auth?
+      @spoof_auth
+    end
+
+    def enable_spoof_auth!
+      @spoof_auth = true
+    end
+
+    def disable_spoof_auth!
+      @spoof_auth = false
     end
   end
 

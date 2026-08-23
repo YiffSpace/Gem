@@ -66,7 +66,7 @@ module YiffSpace
       end
 
       def mark_dirty(user_id)
-        Rails.cache.write(format(Helper::DIRTY_FLAG_KEY, user_id), true, expires_in: DIRTY_FLAG_TTL)
+        Rails.cache.write(format(DIRTY_FLAG_KEY, user_id), true, expires_in: DIRTY_FLAG_TTL)
       end
     end
   end

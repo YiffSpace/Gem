@@ -10,7 +10,7 @@ class ApplicationController < ActionController::Base
 
   def dump
     render(json: {
-      env_client_name: request.env["yiffspace.auth.client_name"],
+      env_client_name: request.env[YiffSpace::Auth::CLIENT_NAME_ENV],
       client_name:     helpers.client_name,
       params:          params,
       session:         session,

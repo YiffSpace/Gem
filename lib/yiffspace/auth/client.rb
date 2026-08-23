@@ -8,7 +8,8 @@ module YiffSpace
     class Client
       attr_accessor(:client_id, :client_secret, :scopes, :resource,
                     :redirect_uri, :server_url, :auth_session_key, :user_session_key,
-                    :update_discord_images, :permissions_separator, :logto_webhook_secret)
+                    :update_discord_images, :permissions_separator, :logto_webhook_secret,
+                    :spoof_user_id, :spoof_permissions, :spoof_roles)
 
       attr_reader(:name)
 
@@ -22,6 +23,10 @@ module YiffSpace
         @update_discord_images   = true
         @permissions_separator   = ":"
         @logto_webhook_secret    = nil
+        # See YiffSpace::Auth.enable_spoof_auth! - spoofing is off for this client until spoof_user_id is set.
+        @spoof_user_id           = nil
+        @spoof_permissions       = []
+        @spoof_roles             = []
       end
 
       def logto(controller)

@@ -8,17 +8,10 @@ module YiffSpace
     module Helper
       extend(ActiveSupport::Concern)
 
-      # auth/user session values (raw Discord profile + OIDC token claims) can easily exceed a
-      # cookie's ~4KB limit, so the session cookie itself only holds an opaque pointer - the real
-      # payload lives in Rails.cache (already a hard dependency of this module, see
-      # #sync_auth_if_dirty! below), keyed off that pointer.
-      SESSION_CACHE_KEY = "yiffspace:auth:session:%s"
-      SESSION_CACHE_TTL = 30.days
-
       module ClassMethods
         def set_client_name(name) # rubocop:disable Naming/AccessorMethodName
           before_action do |controller|
-            controller.request.env["yiffspace.auth.client_name"] = name
+            controller.request.env[CLIENT_NAME_ENV] = name
             if controller.respond_to?(:yiffspace_client_name=)
               controller.yiffspace_client_name = name
             elsif controller.respond_to?(:client_name=)
@@ -32,6 +25,24 @@ module YiffSpace
             end
           end
         end
+
+        # Disables spoof auth for this controller (or just the actions matched by the given
+        # before_action options, e.g. `only:`/`except:`), regardless of the global switch or the
+        # client's spoof_user_id. Useful for controllers that must always see the real session
+        # (e.g. the auth engine's own login/callback controllers).
+        def disable_spoof_auth(**before_action_options)
+          before_action(**before_action_options) { |controller| controller.request.env[SPOOF_OVERRIDE_ENV] = false }
+        end
+
+        # Overrides the user/permissions/roles spoofed for this controller (or just the actions
+        # matched by the given before_action options), independent of the client's configured
+        # spoof_user_id/spoof_permissions/spoof_roles. Still requires the global switch
+        # (YiffSpace::Auth.enable_spoof_auth!) to be on - this only changes *who* gets spoofed in,
+        # not whether spoofing happens at all.
+        def override_spoof_auth(spoof_user_id: nil, spoof_permissions: nil, spoof_roles: nil, **before_action_options)
+          overrides = { spoof_user_id: spoof_user_id, spoof_permissions: spoof_permissions, spoof_roles: spoof_roles }.compact
+          before_action(**before_action_options) { |controller| controller.request.env[SPOOF_OVERRIDE_ENV] = overrides }
+        end
       end
 
       def auth_raw
@@ -39,13 +50,14 @@ module YiffSpace
       end
 
       def auth
+        return spoofed_auth if spoofing?
         return AuthInfo::Anonymous.instance if auth_raw.blank?
 
         AuthInfo.from_session(auth_raw)
       end
 
       def auth?
-        auth_raw.present? && !auth.anonymous?
+        spoofing? || (auth_raw.present? && !auth.anonymous?)
       end
 
       def auth=(value)
@@ -62,13 +74,14 @@ module YiffSpace
       end
 
       def user
+        return spoofed_user if spoofing?
         return UserInfo::Anonymous.instance if user_raw.blank?
 
         UserInfo.from_session(user_raw)
       end
 
       def user?
-        user_raw.present? && !user.anonymous?
+        spoofing? || (user_raw.present? && !user.anonymous?)
       end
 
       def user=(value)
@@ -99,13 +112,12 @@ module YiffSpace
         auth.permissions.has?(name)
       end
 
-      DIRTY_FLAG_KEY = "yiffspace:auth:dirty:%s"
-
       # Checks the dirty flag written by the Logto webhook handler. If set, re-fetches
       # the user's current roles and permissions from the Logto Management API and
       # rewrites the session — without waiting for the access token to expire.
       # Call this as a before_action in any controller that needs instant revocation.
       def sync_auth_if_dirty!
+        return if spoofing?
         return unless auth?
 
         flag_key = format(DIRTY_FLAG_KEY, auth.id)
@@ -156,7 +168,61 @@ module YiffSpace
         request.env[CLIENT_NAME_ENV] = value.to_sym
       end
 
+      # Per-request override set via the disable_spoof_auth/override_spoof_auth class macros, or
+      # by calling this setter directly (e.g. from a custom before_action, for values that can
+      # only be computed per-request). `false` disables spoofing; a Hash overrides individual
+      # :spoof_user_id/:spoof_permissions/:spoof_roles values; nil (the default) defers entirely
+      # to the client's configuration.
+      def spoof_override
+        respond_to?(:request, true) && request.env[SPOOF_OVERRIDE_ENV]
+      end
+
+      def spoof_override=(value)
+        request.env[SPOOF_OVERRIDE_ENV] = value
+      end
+
       private
+
+      # True when YiffSpace::Auth.enable_spoof_auth! has been called and a spoof user id resolves
+      # (from the client's spoof_user_id or a controller override). Clients without one keep
+      # behaving normally even with the global switch on, so spoofing is always opt-in.
+      def spoofing?
+        YiffSpace::Auth.spoof_auth? && resolved_spoof_user_id.present?
+      end
+
+      def resolved_spoof_user_id
+        return nil if spoof_override == false
+
+        (spoof_override.is_a?(Hash) && spoof_override[:spoof_user_id]) || auth_client_config.spoof_user_id
+      end
+
+      def resolved_spoof_permissions
+        (spoof_override.is_a?(Hash) && spoof_override[:spoof_permissions]) || auth_client_config.spoof_permissions
+      end
+
+      def resolved_spoof_roles
+        (spoof_override.is_a?(Hash) && spoof_override[:spoof_roles]) || auth_client_config.spoof_roles
+      end
+
+      # Memoized per-request so repeated calls (controller + views) don't refetch the
+      # spoofed user from the Logto Management API on every access.
+      def spoofed_user
+        @spoofed_user ||= begin
+          config    = auth_client_config
+          api_user  = config.logto_management.get_or_create_user(resolved_spoof_user_id)
+          UserInfo.new(id: api_user.discord_id, user: api_user, discord: api_user.discord.serializable_hash)
+        end
+      end
+
+      def spoofed_auth
+        @spoofed_auth ||= AuthInfo.new(
+          id:          spoofed_user.id,
+          token:       "spoofed",
+          roles:       resolved_spoof_roles,
+          permissions: resolved_spoof_permissions,
+          client_id:   auth_client_config.client_id,
+        )
+      end
 
       def read_session_cache(session_key)
         token = session[session_key]
