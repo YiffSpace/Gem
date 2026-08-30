@@ -1,20 +1,12 @@
 # YiffSpace
 
-Collection of ruby code for https://yiff.space and related projects
+Ruby gems for https://yiff.space and related projects.
 
-## Installation
+- [`yiffspace`](yiffspace) - collection of shared Rails/Ruby code
+- [`yiffspace-auth`](yiffspace-auth) - Logto-based auth engine, depends on `yiffspace`
 
-Add this line to your application's Gemfile:
-
-```ruby
-gem "yiffspace"
-```
-
-And then execute:
-
-```bash
-$ bundle install
-```
+Each gem has its own Gemfile, gemspec, tests, and publish script - see the
+README in its directory.
 
 ## Contributing
 
@@ -22,4 +14,4 @@ Go away
 
 ## License
 
-The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
+Both gems are available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).

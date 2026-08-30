@@ -8,16 +8,17 @@
 #     effectively the same check, so this catches what would otherwise be a broken release before
 #     anything is pushed, instead of after
 #   - commit as just "X.Y.Z"
-#   - tag "vX.Y.Z" (lightweight, matching every existing tag)
+#   - tag "yiffspace-auth-vX.Y.Z" (lightweight, namespaced since this repo also publishes the
+#     yiffspace gem from its own tag namespace)
 #   - push both, then create a GitHub release titled "X.Y.Z" on that tag, with release notes
 #     gathered as "* <commit subject>" for every commit since the last tag - editable before
 #     anything is pushed
-#   - wait for the resulting "Publish" workflow run to appear, then watch it until it finishes,
-#     logging whether it succeeded or failed
+#   - wait for the resulting "Publish yiffspace-auth" workflow run to appear, then watch it until
+#     it finishes, logging whether it succeeded or failed
 #
-# Publishing to rubygems.org itself happens in CI (.github/workflows/publish.yml), triggered by
-# the "released" event from the GitHub release this script creates - this script does not touch
-# rubygems.org directly, it just watches that workflow run to completion.
+# Publishing to rubygems.org itself happens in CI (.github/workflows/publish-auth.yml), triggered
+# by the "released" event from the GitHub release this script creates - this script does not
+# touch rubygems.org directly, it just watches that workflow run to completion.
 #
 # Usage: bin/publish [VERSION]
 #   bin/publish          # bumps the patch version, e.g. 0.1.7 -> 0.1.8
@@ -96,11 +97,11 @@ def release_notes_for(previous_tag)
   log.each_line.map { |line| "* #{line.strip}" }
 end
 
-def edit_notes(version, subjects)
+def edit_notes(tag, subjects)
   template = <<~NOTES
     #{subjects.join("\n")}
 
-    # Release notes for v#{version} - one line per commit, edit as needed.
+    # Release notes for #{tag} - one line per commit, edit as needed.
     # Lines starting with # are stripped. An empty file aborts the release.
   NOTES
 
@@ -121,7 +122,7 @@ end
 # The "Publish" workflow run triggered by the release we just created - GitHub takes a moment to
 # create it after the release event fires, so poll for it instead of assuming it's there yet.
 def find_workflow_run(sha)
-  runs = JSON.parse(capture("gh", "run", "list", "--workflow=publish.yml", "--json", "databaseId,headSha,event,url", "--limit", "10"))
+  runs = JSON.parse(capture("gh", "run", "list", "--workflow=publish-auth.yml", "--json", "databaseId,headSha,event,url", "--limit", "10"))
   runs.find { |run| run["headSha"] == sha && run["event"] == "release" }
 end
 
@@ -177,16 +178,16 @@ def main(argv)
   run("git", "fetch", "origin", "master", "--tags")
   check_not_behind_origin!
 
-  previous_tag = capture("git", "describe", "--tags", "--abbrev=0").strip
+  previous_tag = capture("git", "describe", "--tags", "--abbrev=0", "--match", "yiffspace-auth-v*").strip
   new_version ||= bump_patch(current_version)
-  new_tag = "v#{new_version}"
+  new_tag = "yiffspace-auth-v#{new_version}"
 
   abort!("#{new_tag} already exists") if tag_exists?(new_tag)
 
   subjects = release_notes_for(previous_tag)
   abort!("no commits since #{previous_tag} - nothing to release") if subjects.empty?
 
-  notes = edit_notes(new_version, subjects)
+  notes = edit_notes(new_tag, subjects)
 
   puts("\nAbout to publish:")
   puts("  #{previous_tag} -> #{new_tag}")

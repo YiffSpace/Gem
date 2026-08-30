@@ -1,4 +1,4 @@
-name: Publish
+name: Publish yiffspace-auth
 permissions:
   contents: read
   id-token: write
@@ -13,12 +13,16 @@ jobs:
   zeitwerk:
     uses: ./.github/workflows/zeitwerk.yml
   publish:
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.event.release.tag_name, 'yiffspace-auth-v')
     needs: [ rubocop, zeitwerk ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: .ruby-version
+          ruby-version: yiffspace-auth/.ruby-version
           bundler-cache: true
+          working-directory: yiffspace-auth
       - uses: rubygems/release-gem@v1
+        with:
+          working-directory: yiffspace-auth

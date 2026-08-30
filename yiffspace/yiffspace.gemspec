@@ -15,8 +15,8 @@ Gem::Specification.new do |spec|
 
   spec.metadata["allowed_push_host"]     = "https://rubygems.org"
   spec.metadata["homepage_uri"]          = spec.homepage
-  spec.metadata["source_code_uri"]       = "https://github.com/YiffSpace/Gem"
-  spec.metadata["changelog_uri"]         = "https://github.com/YiffSpace/Gem/blob/master/CHANGELOG.md"
+  spec.metadata["source_code_uri"]       = "https://github.com/YiffSpace/Gem/tree/master/yiffspace"
+  spec.metadata["changelog_uri"]         = "https://github.com/YiffSpace/Gem/blob/master/yiffspace/CHANGELOG.md"
   spec.metadata["rubygems_mfa_required"] = "true"
 
   spec.files = Dir.chdir(File.expand_path(__dir__)) do

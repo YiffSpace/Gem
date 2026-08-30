@@ -9,11 +9,16 @@ on:
 
 jobs:
   rubocop:
+    strategy:
+      matrix:
+        dir: [ yiffspace, yiffspace-auth ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: .ruby-version
+          ruby-version: ${{ matrix.dir }}/.ruby-version
           bundler-cache: true
+          working-directory: ${{ matrix.dir }}
       - run: bundle exec rubocop
+        working-directory: ${{ matrix.dir }}

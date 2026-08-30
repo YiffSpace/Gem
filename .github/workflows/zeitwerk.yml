@@ -9,11 +9,20 @@ on:
 
 jobs:
   zeitwerk:
+    strategy:
+      matrix:
+        include:
+          - dir: yiffspace
+            require: yiffspace
+          - dir: yiffspace-auth
+            require: yiffspace/auth
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: .ruby-version
+          ruby-version: ${{ matrix.dir }}/.ruby-version
           bundler-cache: true
-      - run: bundle exec ruby -e "require('yiffspace'); Zeitwerk::Loader.eager_load_all"
+          working-directory: ${{ matrix.dir }}
+      - run: bundle exec ruby -e "require('${{ matrix.require }}'); Zeitwerk::Loader.eager_load_all"
+        working-directory: ${{ matrix.dir }}

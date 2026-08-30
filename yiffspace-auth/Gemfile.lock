@@ -1,7 +1,5 @@
-GIT
-  remote: https://github.com/YiffSpace/Gem.git
-  revision: 31b315f1dcab99e6482f1767664678c34f22a202
-  branch: master
+PATH
+  remote: ../yiffspace
   specs:
     yiffspace (0.1.8)
       abbrev (>= 0.1.2)

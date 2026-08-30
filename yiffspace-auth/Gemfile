@@ -6,7 +6,7 @@ git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 # Specify your gem's dependencies in yiffspace-auth.gemspec.
 gemspec
 
-gem("yiffspace", github: "YiffSpace/Gem", branch: "master")
+gem("yiffspace", path: "../yiffspace")
 
 gem("puma")
 
