@@ -17,8 +17,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: ${{ matrix.dir }}/.ruby-version
+          ruby-version: .ruby-version
           bundler-cache: true
-          working-directory: ${{ matrix.dir }}
+          working-directory: packages/${{ matrix.dir }}
       - run: bundle exec rubocop
-        working-directory: ${{ matrix.dir }}
+        working-directory: packages/${{ matrix.dir }}

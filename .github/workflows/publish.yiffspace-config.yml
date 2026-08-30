@@ -20,9 +20,9 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: yiffspace-config/.ruby-version
+          ruby-version: .ruby-version
           bundler-cache: true
-          working-directory: yiffspace-config
+          working-directory: packages/yiffspace-config
       - uses: rubygems/release-gem@v1
         with:
-          working-directory: yiffspace-config
+          working-directory: packages/yiffspace-config
