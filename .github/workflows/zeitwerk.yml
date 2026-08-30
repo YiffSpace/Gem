@@ -14,10 +14,28 @@ jobs:
         include:
           - dir: yiffspace
             require: yiffspace
+          - dir: yiffspace-arel
+            require: yiffspace/arel
           - dir: yiffspace-auth
             require: yiffspace/auth
+          - dir: yiffspace-config
+            require: yiffspace/config
+          - dir: yiffspace-core
+            require: yiffspace/core
+          - dir: yiffspace-ext
+            require: yiffspace/ext
           - dir: yiffspace-fixers
             require: yiffspace/fixers
+          - dir: yiffspace-images
+            require: yiffspace/images
+          - dir: yiffspace-include
+            require: yiffspace/include
+          - dir: yiffspace-search
+            require: yiffspace/search
+          - dir: yiffspace-tables
+            require: yiffspace/tables
+          - dir: yiffspace-user
+            require: yiffspace/user
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

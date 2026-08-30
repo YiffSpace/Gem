@@ -6,7 +6,8 @@ git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 # Specify your gem's dependencies in yiffspace-fixers.gemspec.
 gemspec
 
-gem("yiffspace", path: "../yiffspace")
+gem("yiffspace-core", path: "../yiffspace-core")
+gem("yiffspace-ext", path: "../yiffspace-ext")
 
 gem("puma")
 

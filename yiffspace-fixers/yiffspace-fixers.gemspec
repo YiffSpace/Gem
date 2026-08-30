@@ -24,6 +24,6 @@ Gem::Specification.new do |spec|
   end
 
   spec.add_dependency("rails", ">= 7.1")
-  spec.add_dependency("yiffspace", ">= 0.1.0")
+  spec.add_dependency("yiffspace-core", ">= 0.2.0")
   spec.add_dependency("zeitwerk", ">= 2.6")
 end

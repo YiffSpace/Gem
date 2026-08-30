@@ -11,7 +11,7 @@ jobs:
   rubocop:
     strategy:
       matrix:
-        dir: [ yiffspace, yiffspace-auth, yiffspace-fixers ]
+        dir: [ yiffspace, yiffspace-arel, yiffspace-auth, yiffspace-config, yiffspace-core, yiffspace-ext, yiffspace-fixers, yiffspace-images, yiffspace-include, yiffspace-search, yiffspace-tables, yiffspace-user ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

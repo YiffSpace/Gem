@@ -1,0 +1,28 @@
+name: Publish yiffspace-images
+permissions:
+  contents: read
+  id-token: write
+on:
+  workflow_dispatch:
+  release:
+    types: [ released ]
+
+jobs:
+  rubocop:
+    uses: ./.github/workflows/rubocop.yml
+  zeitwerk:
+    uses: ./.github/workflows/zeitwerk.yml
+  publish:
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.event.release.tag_name, 'yiffspace-images-v')
+    needs: [ rubocop, zeitwerk ]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: yiffspace-images/.ruby-version
+          bundler-cache: true
+          working-directory: yiffspace-images
+      - uses: rubygems/release-gem@v1
+        with:
+          working-directory: yiffspace-images

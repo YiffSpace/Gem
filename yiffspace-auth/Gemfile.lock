@@ -1,11 +1,18 @@
 PATH
-  remote: ../yiffspace
+  remote: ../yiffspace-core
   specs:
-    yiffspace (0.1.8)
+    yiffspace-core (0.2.0)
       abbrev (>= 0.1.2)
-      httparty (>= 0.24)
       rails (>= 8.1)
-      request_store (>= 1.7)
+      yiffspace-ext (>= 0.0.1)
+      zeitwerk (>= 2.6)
+
+PATH
+  remote: ../yiffspace-ext
+  specs:
+    yiffspace-ext (0.0.1)
+      activerecord (>= 7.1)
+      activesupport (>= 7.1)
       zeitwerk (>= 2.6)
 
 PATH
@@ -15,7 +22,7 @@ PATH
       httparty (>= 0.24)
       logto (>= 0.2.0)
       rails (>= 7.1)
-      yiffspace (>= 0.1.0)
+      yiffspace-core (>= 0.2.0)
       zeitwerk (>= 2.6)
 
 GEM
@@ -243,8 +250,6 @@ GEM
     regexp_parser (2.12.0)
     reline (0.6.3)
       io-console (~> 0.5)
-    request_store (1.7.0)
-      rack (>= 1.4)
     rubocop (1.88.2)
       json (~> 2.3)
       language_server-protocol (~> 3.17.0.2)
@@ -324,8 +329,9 @@ DEPENDENCIES
   rubocop-yiffspace (~> 0.0.1)
   sprockets-rails
   sqlite3
-  yiffspace!
   yiffspace-auth!
+  yiffspace-core!
+  yiffspace-ext!
 
 CHECKSUMS
   abbrev (0.1.2) sha256=ad1b4eaaaed4cb722d5684d63949e4bde1d34f2a95e20db93aecfe7cbac74242
@@ -413,7 +419,6 @@ CHECKSUMS
   rdoc (8.0.0) sha256=03bf8c08a9639658855a0cfd77c0abca8325c227693f7f33f82957811348c469
   regexp_parser (2.12.0) sha256=35a916a1d63190ab5c9009457136ae5f3c0c7512d60291d0d1378ba18ce08ebb
   reline (0.6.3) sha256=1198b04973565b36ec0f11542ab3f5cfeeec34823f4e54cebde90968092b1835
-  request_store (1.7.0) sha256=e1b75d5346a315f452242a68c937ef8e48b215b9453a77a6c0acdca2934c88cb
   rubocop (1.88.2) sha256=8def251c90cd955feb4daa3edc0ab56893250c4ce90ef81e6c80c03f9a939bbf
   rubocop-ast (1.50.0) sha256=b9ca88300da0803ee222ad20cdb30494c0a784eed06fdc35d254b06d662788db
   rubocop-erb (0.7.1) sha256=17d376b5b9ebb08b75f6bce6bcdc61603b506ef4523473483885d2be88e9099d
@@ -441,8 +446,9 @@ CHECKSUMS
   useragent (0.16.11) sha256=700e6413ad4bb954bb63547fa098dddf7b0ebe75b40cc6f93b8d54255b173844
   websocket-driver (0.8.2) sha256=97c556b019bf3410b4961002ac501621e9322d3f8a7bc02161a09301cc4c4146
   websocket-extensions (0.1.5) sha256=1c6ba63092cda343eb53fc657110c71c754c56484aad42578495227d717a8241
-  yiffspace (0.1.8)
   yiffspace-auth (0.0.5)
+  yiffspace-core (0.2.0)
+  yiffspace-ext (0.0.1)
   zeitwerk (2.8.2) sha256=7212a61311083c604184b1ea2574b9aa05cd14f855a0841c06985cabe9181d12
 
 BUNDLED WITH
