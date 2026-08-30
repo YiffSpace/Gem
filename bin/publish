@@ -12,10 +12,12 @@
 #   - push both, then create a GitHub release titled "X.Y.Z" on that tag, with release notes
 #     gathered as "* <commit subject>" for every commit since the last tag - editable before
 #     anything is pushed
+#   - wait for the resulting "Publish" workflow run to appear, then watch it until it finishes,
+#     logging whether it succeeded or failed
 #
 # Publishing to rubygems.org itself happens in CI (.github/workflows/publish.yml), triggered by
 # the "released" event from the GitHub release this script creates - this script does not touch
-# rubygems.org directly.
+# rubygems.org directly, it just watches that workflow run to completion.
 #
 # Usage: bin/publish [VERSION]
 #   bin/publish          # bumps the patch version, e.g. 0.1.7 -> 0.1.8
@@ -23,6 +25,7 @@
 
 require("English")
 require("fileutils")
+require("json")
 require("shellwords")
 require("tmpdir")
 
@@ -115,6 +118,39 @@ def edit_notes(version, subjects)
   end
 end
 
+# The "Publish" workflow run triggered by the release we just created - GitHub takes a moment to
+# create it after the release event fires, so poll for it instead of assuming it's there yet.
+def find_workflow_run(sha)
+  runs = JSON.parse(capture("gh", "run", "list", "--workflow=publish.yml", "--json", "databaseId,headSha,event,url", "--limit", "10"))
+  runs.find { |run| run["headSha"] == sha && run["event"] == "release" }
+end
+
+def wait_for_workflow_run(sha, timeout: 120, interval: 3)
+  deadline = Process.clock_gettime(Process::CLOCK_MONOTONIC) + timeout
+  loop do
+    run = find_workflow_run(sha)
+    return run if run
+
+    abort!("timed out waiting for the publish workflow run to appear for #{sha}") if Process.clock_gettime(Process::CLOCK_MONOTONIC) > deadline
+
+    sleep(interval)
+  end
+end
+
+# Streams the run's progress and blocks until it finishes, then logs the outcome.
+def watch_workflow_run!(run)
+  puts("\nWatching #{run['url']}")
+  succeeded = system("gh", "run", "watch", run["databaseId"].to_s, "--exit-status", chdir: ROOT)
+
+  if succeeded
+    puts("\npublish: workflow succeeded: #{run['url']}")
+  else
+    conclusion = capture("gh", "run", "view", run["databaseId"].to_s, "--json", "conclusion", "-q", ".conclusion").strip
+    warn("\npublish: workflow #{conclusion.empty? ? 'failed' : conclusion}: #{run['url']}")
+    exit(1)
+  end
+end
+
 def confirm!(prompt)
   print("#{prompt} [y/N] ")
   answer = $stdin.gets&.strip
@@ -179,7 +215,9 @@ def main(argv)
     run("gh", "release", "create", new_tag, "--title", new_version, "--notes-file", notes_path)
   end
 
-  puts("\nPublished #{new_tag} - rubygems publish happens in CI once it finishes.")
+  puts("\nPublished #{new_tag} - waiting for the publish workflow to start...")
+  sha = capture("git", "rev-parse", new_tag).strip
+  watch_workflow_run!(wait_for_workflow_run(sha))
 end
 
 main(ARGV) if $PROGRAM_NAME == __FILE__
