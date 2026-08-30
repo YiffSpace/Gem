@@ -16,7 +16,7 @@
 #   - wait for the resulting "Publish yiffspace" workflow run to appear, then watch it until it
 #     finishes, logging whether it succeeded or failed
 #
-# Publishing to rubygems.org itself happens in CI (.github/workflows/publish.yml), triggered by
+# Publishing to rubygems.org itself happens in CI (.github/workflows/publish.yiffspace.yml), triggered by
 # the "released" event from the GitHub release this script creates - this script does not touch
 # rubygems.org directly, it just watches that workflow run to completion.
 #
@@ -122,7 +122,7 @@ end
 # The "Publish" workflow run triggered by the release we just created - GitHub takes a moment to
 # create it after the release event fires, so poll for it instead of assuming it's there yet.
 def find_workflow_run(sha)
-  runs = JSON.parse(capture("gh", "run", "list", "--workflow=publish.yml", "--json", "databaseId,headSha,event,url", "--limit", "10"))
+  runs = JSON.parse(capture("gh", "run", "list", "--workflow=publish.yiffspace.yml", "--json", "databaseId,headSha,event,url", "--limit", "10"))
   runs.find { |run| run["headSha"] == sha && run["event"] == "release" }
 end
 
