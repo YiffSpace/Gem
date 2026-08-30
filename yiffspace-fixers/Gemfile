@@ -3,12 +3,14 @@
 source("https://rubygems.org")
 git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
-# Specify your gem's dependencies in yiffspace.gemspec.
+# Specify your gem's dependencies in yiffspace-fixers.gemspec.
 gemspec
+
+gem("yiffspace", path: "../yiffspace")
 
 gem("puma")
 
-gem("sqlite3")
+gem("pg")
 
 gem("sprockets-rails")
 

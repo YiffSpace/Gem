@@ -16,6 +16,8 @@ jobs:
             require: yiffspace
           - dir: yiffspace-auth
             require: yiffspace/auth
+          - dir: yiffspace-fixers
+            require: yiffspace/fixers
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
