@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
-require_relative("../utils/user_to_id")
-
-include(YiffSpace::Utils::UserToId) # rubocop:disable Style/MixinUsage
+begin
+  require("yiffspace/user")
+  include(YiffSpace::User::ToId)
+rescue LoadError
+  nil
+end

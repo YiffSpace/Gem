@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
-require_relative("../utils/cache")
-
-Cache = YiffSpace::Utils::Cache
+begin
+  require("yiffspace/core")
+  Cache = YiffSpace::Utils::Cache
+rescue LoadError
+  nil
+end

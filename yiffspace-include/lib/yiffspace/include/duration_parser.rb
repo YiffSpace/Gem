@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
-require_relative("../utils/duration_parser")
-
-DurationParser = YiffSpace::Utils::DurationParser
+begin
+  require("yiffspace/core")
+  DurationParser = YiffSpace::Utils::DurationParser
+rescue LoadError
+  nil
+end

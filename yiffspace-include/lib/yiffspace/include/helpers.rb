@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
-require_relative("../utils/helpers")
-
-Helpers = YiffSpace::Utils::Helpers
+begin
+  require("yiffspace/core")
+  Helpers = YiffSpace::Utils::Helpers
+rescue LoadError
+  nil
+end

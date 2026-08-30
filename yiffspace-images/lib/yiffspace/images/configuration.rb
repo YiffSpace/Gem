@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 module YiffSpace
-  class Configuration
-    class Images
+  module Images
+    class Configuration
       attr_accessor(:server_url, :update_token, :default_avatar_type, :default_banner_type, :httparty_options)
 
       def initialize
@@ -13,7 +13,7 @@ module YiffSpace
           timeout:      10,
           open_timeout: 5,
           headers:      {
-            "User-Agent" => "YiffSpaceRuby/#{YiffSpace::VERSION} (https://yiff.space)",
+            "User-Agent" => "YiffSpaceRuby/#{YiffSpace::Images::VERSION} (https://yiff.space)",
           },
         }
       end

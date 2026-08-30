@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
-require_relative("../concerns/api_methods")
-
-ApiMethods = YiffSpace::Concerns::ApiMethods
+begin
+  require("yiffspace/core")
+  ApiMethods = YiffSpace::Concerns::ApiMethods
+rescue LoadError
+  nil
+end

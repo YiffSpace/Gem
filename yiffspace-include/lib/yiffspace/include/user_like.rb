@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
-require_relative("../utils/user_like")
-
-UserLike = YiffSpace::Utils::UserLike
+begin
+  require("yiffspace/user")
+  UserLike = YiffSpace::User::Like
+rescue LoadError
+  nil
+end

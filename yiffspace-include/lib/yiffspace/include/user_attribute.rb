@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
-require_relative("../utils/user_attribute")
-
-UserAttribute = YiffSpace::Utils::UserAttribute
+begin
+  require("yiffspace/user")
+  UserAttribute = YiffSpace::User::Attribute
+rescue LoadError
+  nil
+end

@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
-require_relative("../concerns/user_name_methods")
-
-UserNameMethods = YiffSpace::Concerns::UserNameMethods
+begin
+  require("yiffspace/user")
+  UserNameMethods = YiffSpace::Concerns::UserNameMethods
+rescue LoadError
+  nil
+end

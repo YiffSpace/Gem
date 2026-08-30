@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
-require_relative("../utils/routes")
-
-Routes = YiffSpace::Utils::Routes
+begin
+  require("yiffspace/core")
+  Routes = YiffSpace::Utils::Routes
+rescue LoadError
+  nil
+end

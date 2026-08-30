@@ -1,0 +1,224 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+# Cuts a release the same way the last several were done by hand:
+#   - bump lib/yiffspace/images/version.rb (patch, unless an explicit version is given)
+#   - refresh Gemfile.lock's own `yiffspace-auth (X.Y.Z)` entries (nothing else)
+#   - verify a frozen `bundle install` succeeds against that lockfile - CI's bundler-cache runs
+#     effectively the same check, so this catches what would otherwise be a broken release before
+#     anything is pushed, instead of after
+#   - commit as just "X.Y.Z"
+#   - tag "yiffspace-images-vX.Y.Z" (lightweight, namespaced since this repo also publishes the
+#     yiffspace gem from its own tag namespace)
+#   - push both, then create a GitHub release titled "X.Y.Z" on that tag, with release notes
+#     gathered as "* <commit subject>" for every commit since the last tag - editable before
+#     anything is pushed
+#   - wait for the resulting "Publish yiffspace-images" workflow run to appear, then watch it until
+#     it finishes, logging whether it succeeded or failed
+#
+# Publishing to rubygems.org itself happens in CI (.github/workflows/publish.yiffspace-images.yml), triggered
+# by the "released" event from the GitHub release this script creates - this script does not
+# touch rubygems.org directly, it just watches that workflow run to completion.
+#
+# Usage: bin/publish [VERSION]
+#   bin/publish          # bumps the patch version, e.g. 0.1.7 -> 0.1.8
+#   bin/publish 0.2.0     # publishes that exact version instead
+
+require("English")
+require("fileutils")
+require("json")
+require("shellwords")
+require("tmpdir")
+
+ROOT = File.expand_path("..", __dir__)
+VERSION_FILE = File.join(ROOT, "lib/yiffspace/images/version.rb")
+
+def abort!(message)
+  warn("publish: #{message}")
+  exit(1)
+end
+
+def run(*cmd, env: {}, allow_failure: false)
+  puts("+ #{cmd.join(' ')}")
+  system(env, *cmd, chdir: ROOT) || allow_failure || abort!("command failed: #{cmd.join(' ')}")
+end
+
+# Same check CI's bundler-cache effectively runs: with a frozen lockfile, `bundle install` fails
+# instead of silently re-resolving if the lockfile doesn't already satisfy the Gemfile/gemspec.
+def frozen_install_ok?
+  puts("+ BUNDLE_FROZEN=true bundle install --quiet")
+  system({ "BUNDLE_FROZEN" => "true" }, "bundle", "install", "--quiet", chdir: ROOT)
+end
+
+def restore_working_tree!
+  system("git", "checkout", "--", "lib/yiffspace/images/version.rb", "Gemfile.lock", chdir: ROOT)
+end
+
+def capture(*cmd)
+  output = IO.popen(cmd, chdir: ROOT, &:read)
+  abort!("command failed: #{cmd.join(' ')}") unless $CHILD_STATUS.success?
+
+  output
+end
+
+def tag_exists?(tag)
+  system("git", "rev-parse", "--quiet", "--verify", "refs/tags/#{tag}", chdir: ROOT, out: File::NULL, err: File::NULL)
+end
+
+def ancestor?(ancestor, descendant)
+  system("git", "merge-base", "--is-ancestor", ancestor, descendant, chdir: ROOT)
+end
+
+# Local being *ahead* of origin/master is fine - the commits about to be made for this release
+# will be pushed along with everything else. Only bail if origin has commits we don't (behind, or
+# a true fork) - a push at the end would otherwise be rejected after we've already committed/tagged.
+def check_not_behind_origin!
+  return if ancestor?("origin/master", "HEAD")
+
+  if ancestor?("HEAD", "origin/master")
+    abort!("master is behind origin/master - pull first")
+  else
+    abort!("master has diverged from origin/master - reconcile manually first")
+  end
+end
+
+def current_version
+  contents = File.read(VERSION_FILE)
+  contents[/VERSION\s*=\s*"([^"]+)"/, 1] || abort!("couldn't find VERSION in #{VERSION_FILE}")
+end
+
+def bump_patch(version)
+  major, minor, patch = version.split(".").map(&:to_i)
+  "#{major}.#{minor}.#{patch + 1}"
+end
+
+def release_notes_for(previous_tag)
+  log = capture("git", "log", "--reverse", "--format=%s", "#{previous_tag}..HEAD")
+  log.each_line.map { |line| "* #{line.strip}" }
+end
+
+def edit_notes(tag, subjects)
+  template = <<~NOTES
+    #{subjects.join("\n")}
+
+    # Release notes for #{tag} - one line per commit, edit as needed.
+    # Lines starting with # are stripped. An empty file aborts the release.
+  NOTES
+
+  Dir.mktmpdir do |dir|
+    path = File.join(dir, "RELEASE_NOTES.md")
+    File.write(path, template)
+
+    editor = capture("git", "var", "GIT_EDITOR").strip
+    system("#{editor} #{Shellwords.escape(path)}") || abort!("editor exited with a failure")
+
+    edited = File.readlines(path).reject { |line| line.start_with?("#") }.join.strip
+    abort!("empty release notes, aborting") if edited.empty?
+
+    "#{edited}\n"
+  end
+end
+
+# The "Publish" workflow run triggered by the release we just created - GitHub takes a moment to
+# create it after the release event fires, so poll for it instead of assuming it's there yet.
+def find_workflow_run(sha)
+  runs = JSON.parse(capture("gh", "run", "list", "--workflow=publish.yiffspace-images.yml", "--json", "databaseId,headSha,event,url", "--limit", "10"))
+  runs.find { |run| run["headSha"] == sha && run["event"] == "release" }
+end
+
+def wait_for_workflow_run(sha, timeout: 120, interval: 3)
+  deadline = Process.clock_gettime(Process::CLOCK_MONOTONIC) + timeout
+  loop do
+    run = find_workflow_run(sha)
+    return run if run
+
+    abort!("timed out waiting for the publish workflow run to appear for #{sha}") if Process.clock_gettime(Process::CLOCK_MONOTONIC) > deadline
+
+    sleep(interval)
+  end
+end
+
+# Streams the run's progress and blocks until it finishes, then logs the outcome.
+def watch_workflow_run!(run)
+  puts("\nWatching #{run['url']}")
+  succeeded = system("gh", "run", "watch", run["databaseId"].to_s, "--exit-status", chdir: ROOT)
+
+  if succeeded
+    puts("\npublish: workflow succeeded: #{run['url']}")
+  else
+    conclusion = capture("gh", "run", "view", run["databaseId"].to_s, "--json", "conclusion", "-q", ".conclusion").strip
+    warn("\npublish: workflow #{conclusion.empty? ? 'failed' : conclusion}: #{run['url']}")
+    exit(1)
+  end
+end
+
+def confirm!(prompt)
+  print("#{prompt} [y/N] ")
+  answer = $stdin.gets&.strip
+  abort!("aborted") unless answer&.match?(/\Ay(es)?\z/i)
+end
+
+def parse_version_arg!(argv)
+  abort!("usage: bin/publish [VERSION]") if argv.size > 1
+
+  version = argv.first
+  abort!("VERSION must look like 1.2.3, got #{version.inspect}") if version && !version.match?(/\A\d+\.\d+\.\d+\z/)
+
+  version
+end
+
+def main(argv)
+  new_version = parse_version_arg!(argv)
+
+  abort!("working tree isn't clean - commit or stash first") unless capture("git", "status", "--porcelain").empty?
+
+  current_branch = capture("git", "branch", "--show-current").strip
+  abort!("must be on master, currently on #{current_branch.inspect}") unless current_branch == "master"
+
+  run("git", "fetch", "origin", "master", "--tags")
+  check_not_behind_origin!
+
+  previous_tag = capture("git", "describe", "--tags", "--abbrev=0", "--match", "yiffspace-images-v*").strip
+  new_version ||= bump_patch(current_version)
+  new_tag = "yiffspace-images-v#{new_version}"
+
+  abort!("#{new_tag} already exists") if tag_exists?(new_tag)
+
+  subjects = release_notes_for(previous_tag)
+  abort!("no commits since #{previous_tag} - nothing to release") if subjects.empty?
+
+  notes = edit_notes(new_tag, subjects)
+
+  puts("\nAbout to publish:")
+  puts("  #{previous_tag} -> #{new_tag}")
+  puts(notes.each_line.map { |line| "  #{line}" }.join)
+  confirm!("Commit, tag, and push?")
+
+  File.write(VERSION_FILE, File.read(VERSION_FILE).sub(/VERSION\s*=\s*"[^"]+"/, %(VERSION = "#{new_version}")))
+  run("bundle", "lock", "--update", "yiffspace-images", "--conservative")
+
+  unless frozen_install_ok?
+    restore_working_tree!
+    abort!("a frozen `bundle install` fails against the updated Gemfile.lock - CI would fail the same way. Working tree restored, nothing committed.")
+  end
+
+  run("git", "add", "lib/yiffspace/images/version.rb", "Gemfile.lock")
+  run("git", "commit", "-m", new_version)
+  # Every existing tag is a plain lightweight tag (not annotated/signed) - force that regardless
+  # of a local tag.gpgSign=true config, which would otherwise upgrade this into an annotated tag
+  # and prompt for a message.
+  run("git", "-c", "tag.gpgSign=false", "tag", new_tag)
+  run("git", "push", "origin", "master", new_tag)
+
+  Dir.mktmpdir do |dir|
+    notes_path = File.join(dir, "notes.md")
+    File.write(notes_path, notes)
+    run("gh", "release", "create", new_tag, "--title", new_version, "--notes-file", notes_path)
+  end
+
+  puts("\nPublished #{new_tag} - waiting for the publish workflow to start...")
+  sha = capture("git", "rev-parse", new_tag).strip
+  watch_workflow_run!(wait_for_workflow_run(sha))
+end
+
+main(ARGV) if $PROGRAM_NAME == __FILE__

@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
-require_relative("../concerns/user_resolvable_methods")
-
-UserResolvableMethods = YiffSpace::Concerns::UserResolvableMethods
+begin
+  require("yiffspace/user")
+  UserResolvableMethods = YiffSpace::Concerns::UserResolvableMethods
+rescue LoadError
+  nil
+end

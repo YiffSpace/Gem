@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
-require_relative("../concerns/active_record_extensions")
-
-ConcurrencyMethods = YiffSpace::Concerns::ConcurrencyMethods
+begin
+  require("yiffspace/core")
+  ConcurrencyMethods = YiffSpace::Concerns::ConcurrencyMethods
+rescue LoadError
+  nil
+end

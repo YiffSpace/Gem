@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
-require_relative("../utils/trace_logger")
-
-TraceLogger = YiffSpace::Utils::TraceLogger
+begin
+  require("yiffspace/core")
+  TraceLogger = YiffSpace::Utils::TraceLogger
+rescue LoadError
+  nil
+end

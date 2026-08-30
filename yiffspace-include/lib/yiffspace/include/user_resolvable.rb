@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
-require_relative("../utils/user_resolvable")
-
-UserResolvable = YiffSpace::Utils::UserResolvable
+begin
+  require("yiffspace/user")
+  UserResolvable = YiffSpace::User::Resolvable
+rescue LoadError
+  nil
+end

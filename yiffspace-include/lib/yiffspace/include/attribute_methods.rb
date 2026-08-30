@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
-require_relative("../concerns/attribute_methods")
-
-AttributeMethods = YiffSpace::Concerns::AttributeMethods
+begin
+  require("yiffspace/core")
+  AttributeMethods = YiffSpace::Concerns::AttributeMethods
+rescue LoadError
+  nil
+end

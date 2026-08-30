@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
-require_relative("../utils/current")
-
-Current = YiffSpace::Utils::Current
+begin
+  require("yiffspace/user")
+  Current = YiffSpace::User::Current
+rescue LoadError
+  nil
+end

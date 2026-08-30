@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
-require_relative("../concerns/has_bit_flags")
-
-HasBitFlags = YiffSpace::Concerns::HasBitFlags
+begin
+  require("yiffspace/core")
+  HasBitFlags = YiffSpace::Concerns::HasBitFlags
+rescue LoadError
+  nil
+end

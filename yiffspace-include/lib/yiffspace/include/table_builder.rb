@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
-require_relative("../utils/table_builder")
-
-TableBuilder = YiffSpace::Utils::TableBuilder
+begin
+  require("yiffspace/tables")
+  TableBuilder = YiffSpace::Tables::Builder
+rescue LoadError
+  nil
+end

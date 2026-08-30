@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
-require_relative("../utils/open_hash")
-
-OpenHash = YiffSpace::Utils::OpenHash
+begin
+  require("yiffspace/core")
+  OpenHash = YiffSpace::Utils::OpenHash
+rescue LoadError
+  nil
+end

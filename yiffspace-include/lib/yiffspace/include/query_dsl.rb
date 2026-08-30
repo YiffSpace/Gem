@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
-require_relative("../search/query_dsl")
-
-QueryDSL = YiffSpace::Search::QueryDSL
+begin
+  require("yiffspace/search")
+  QueryDSL = YiffSpace::Search::QueryDSL
+rescue LoadError
+  nil
+end
