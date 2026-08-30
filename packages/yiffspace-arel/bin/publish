@@ -10,7 +10,7 @@
 #   - commit as just "X.Y.Z"
 #   - tag "yiffspace-arel-vX.Y.Z" (lightweight, namespaced since this repo also publishes the
 #     yiffspace gem from its own tag namespace)
-#   - push both, then create a GitHub release titled "X.Y.Z" on that tag, with release notes
+#   - push both, then create a GitHub release titled "Arel X.Y.Z" on that tag, with release notes
 #     gathered as "* <commit subject>" for every commit since the last tag - editable before
 #     anything is pushed
 #   - wait for the resulting "Publish yiffspace-arel" workflow run to appear, then watch it until
@@ -32,6 +32,7 @@ require("tmpdir")
 
 ROOT = File.expand_path("..", __dir__)
 VERSION_FILE = File.join(ROOT, "lib/yiffspace/arel/version.rb")
+NAME = "Arel"
 
 def abort!(message)
   warn("publish: #{message}")
@@ -213,7 +214,7 @@ def main(argv)
   Dir.mktmpdir do |dir|
     notes_path = File.join(dir, "notes.md")
     File.write(notes_path, notes)
-    run("gh", "release", "create", new_tag, "--title", new_version, "--notes-file", notes_path)
+    run("gh", "release", "create", new_tag, "--title", "#{NAME} #{new_version}", "--notes-file", notes_path)
   end
 
   puts("\nPublished #{new_tag} - waiting for the publish workflow to start...")
