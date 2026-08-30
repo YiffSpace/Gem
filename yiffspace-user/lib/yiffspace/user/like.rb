@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 module YiffSpace
-  module Utils
-    module UserLike
+  module User
+    module Like
     end
   end
 end

@@ -4,13 +4,13 @@ require("active_support/core_ext/module/delegation")
 require("active_support/core_ext/string/inflections")
 
 module YiffSpace
-  module Utils
-    class UserResolvable
+  module User
+    class Resolvable
       attr_reader(:user, :ip_addr)
 
       def initialize(user, ip_addr, validate: true)
         if user.is_a?(YiffSpace.config.user_resolvable_class)
-          TraceLogger.warn(self.class.name.demodulize, "Unexpectedly received #{user.class.name} for user argument")
+          Utils::TraceLogger.warn(self.class.name.demodulize, "Unexpectedly received #{user.class.name} for user argument")
           user = recursive_resolve(user)
         end
         @user = user

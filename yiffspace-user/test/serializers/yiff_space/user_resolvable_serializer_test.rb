@@ -22,7 +22,7 @@ module YiffSpace
 
       test("serializes user id and ip_addr") do
         user       = @user_class.new(42)
-        resolvable = Utils::UserResolvable.new(user, "1.2.3.4")
+        resolvable = User::Resolvable.new(user, "1.2.3.4")
         serializer = UserResolvableSerializer.instance
 
         result = serializer.serialize(resolvable)
@@ -36,26 +36,26 @@ module YiffSpace
 
         result = serializer.deserialize({ "user" => 42, "ip_addr" => "1.2.3.4" })
 
-        assert_instance_of(Utils::UserResolvable, result)
+        assert_instance_of(User::Resolvable, result)
         assert_equal(42, result.user.id)
         assert_equal("1.2.3.4", result.ip_addr)
       end
 
       test("round-trips through serialize and deserialize") do
         user       = @user_class.new(99)
-        resolvable = Utils::UserResolvable.new(user, "10.0.0.1")
+        resolvable = User::Resolvable.new(user, "10.0.0.1")
         serializer = UserResolvableSerializer.instance
 
         restored = serializer.deserialize(serializer.serialize(resolvable))
 
-        assert_instance_of(Utils::UserResolvable, restored)
+        assert_instance_of(User::Resolvable, restored)
         assert_equal(99, restored.user.id)
         assert_equal("10.0.0.1", restored.ip_addr)
       end
 
       test("serialize? returns true for UserResolvable") do
         user       = @user_class.new(1)
-        resolvable = Utils::UserResolvable.new(user, "127.0.0.1")
+        resolvable = User::Resolvable.new(user, "127.0.0.1")
         serializer = UserResolvableSerializer.instance
 
         assert(serializer.serialize?(resolvable))

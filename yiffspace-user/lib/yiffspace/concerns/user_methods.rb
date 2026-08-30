@@ -7,11 +7,11 @@ module YiffSpace
 
       module ClassMethods
         def belongs_to_user(*, **)
-          UserAttribute.new(self, *, **, db: true)
+          User::Attribute.new(self, *, **, db: true)
         end
 
         def resolvable(*, **)
-          UserAttribute.new(self, *, **, db: false)
+          User::Attribute.new(self, *, **, db: false)
         end
 
         def with_user(instance, method, user, *args, **, &)

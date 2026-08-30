@@ -1,6 +1,6 @@
 # YiffSpace::Config
 
-Standalone ENV-backed config DSL (`YiffSpace::ConfigBuilder`), for
+Standalone ENV-backed config DSL (`YiffSpace::Config::Builder`), for
 https://yiff.space and related projects. Not a Rails engine - no dependency
 on `yiffspace` itself, only ActiveSupport.
 
@@ -21,13 +21,13 @@ $ bundle install
 ## Usage
 
 ```ruby
-class Config < YiffSpace::ConfigBuilder
+class Config < YiffSpace::Config::Builder
   config(:some_value, required: true)
   config(:some_flag, :boolean) { false }
 end
 ```
 
-See `YiffSpace::ConfigBuilder` for the full API.
+See `YiffSpace::Config::Builder` for the full API.
 
 ## Contributing
 

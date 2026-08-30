@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module YiffSpace
-  module Utils
+  module Tables
     # A helper class for building HTML tables. Used in views.
     #
     # @example
@@ -14,7 +14,7 @@ module YiffSpace
     #   <% end %>
     #
     # @see app/views/table_builder/_table.html.erb
-    class TableBuilder
+    class Builder
       # Represents a single column in the table.
       class Column
         attr_reader(:attribute, :name, :block, :header_attributes, :body_attributes, :caption)

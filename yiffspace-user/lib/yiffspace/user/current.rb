@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module YiffSpace
-  module Utils
+  module User
     class Current < ActiveSupport::CurrentAttributes
       attribute(:user, :ip_addr, :request)
 

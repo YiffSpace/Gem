@@ -8,7 +8,7 @@ module YiffSpace
       module ClassMethods
         def name_to_id(name)
           normalized_name = normalize_name(name)
-          Cache.fetch("uni:#{normalized_name}", expires_in: 4.hours) do
+          Utils::Cache.fetch("uni:#{normalized_name}", expires_in: 4.hours) do
             ::User.where("lower(name) = ?", normalized_name).pick(:id)
           end
         end
@@ -41,7 +41,7 @@ module YiffSpace
           RequestStore[:id_name_cache] ||= {}
           return RequestStore[:id_name_cache][user_id] if RequestStore[:id_name_cache].key?(user_id)
 
-          name = Cache.fetch("uin:#{user_id}", expires_in: 4.hours) do
+          name = Utils::Cache.fetch("uin:#{user_id}", expires_in: 4.hours) do
             ::User.where(id: user_id).pick(:name) || YiffSpace.config.anonymous_user_name.call
           end
           RequestStore[:id_name_cache][user_id] = name

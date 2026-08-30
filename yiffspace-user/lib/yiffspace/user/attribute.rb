@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 module YiffSpace
-  module Utils
+  module User
     # User class must have id_to_name & name_to_id methods, and global u2id method must exist
-    class UserAttribute
+    class Attribute
       class CircularAliasError < StandardError; end
       class CircularCloneError < StandardError; end
       class DuplicateAttributeError < StandardError; end
@@ -12,7 +12,7 @@ module YiffSpace
 
       # noinspection RubyUnusedLocalVariable
       def initialize(klass, attribute, db:, ip: !db, optional: !db, clones: [], clone: [], overwrite: false, aliases: [], alias: [], ignore_nil: false, **ar_options)
-        UserAttribute.class_setup(klass)
+        Attribute.class_setup(klass)
         @klass = klass
         @attribute = attribute.to_sym
         @db = db
@@ -25,7 +25,7 @@ module YiffSpace
         @ignore_nil = ignore_nil
         @ar_options = ar_options
         if ar_options.any? && !db # rubocop:disable Style/IfUnlessModifier
-          TraceLogger.warn("UserAttribute", "Unexpected extra options for non-db attribute: #{ar_options.inspect}", ignore: [%r{/concerns/user_methods\.rb}, %r{/logical/user_attribute\.rb}])
+          Utils::TraceLogger.warn("UserAttribute", "Unexpected extra options for non-db attribute: #{ar_options.inspect}", ignore: [%r{/concerns/user_methods\.rb}, %r{/logical/user_attribute\.rb}])
         end
         @ar_options[:optional] = optional
         @ar_options[:class_name] = "User"
@@ -144,7 +144,7 @@ module YiffSpace
           ua.validate_value!(value, :id, record: self)
           if ua.db
             write_attribute("#{ua.attribute}_id", value)
-            TraceLogger.warn("UserAttribute", "#{ua.klass.name}.#{ua.attribute}_id= should not be used when clone is enabled (#{ua.clones.join(', ')})", ignore: [%r{/concerns/user_methods\.rb}, %r{/logical/user_attribute\.rb}]) if ua.clones.any?
+            Utils::TraceLogger.warn("UserAttribute", "#{ua.klass.name}.#{ua.attribute}_id= should not be used when clone is enabled (#{ua.clones.join(', ')})", ignore: [%r{/concerns/user_methods\.rb}, %r{/logical/user_attribute\.rb}]) if ua.clones.any?
           else
             value = ::User.find(value) if value.is_a?(Integer) || value.is_a?(String)
             ua.clones.each do |cattr|

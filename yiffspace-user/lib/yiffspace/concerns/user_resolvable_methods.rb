@@ -5,7 +5,7 @@ module YiffSpace
     module UserResolvableMethods
       def resolvable(ip_addr = nil)
         attr = YiffSpace.config.last_ip_addr_attribute
-        UserResolvable.new(self, ip_addr || (attr && respond_to?(attr) ? send(attr) : nil) || YiffSpace.config.default_ip_address)
+        User::Resolvable.new(self, ip_addr || (attr && respond_to?(attr) ? send(attr) : nil) || YiffSpace.config.default_ip_address)
       end
 
       def resolve
@@ -30,7 +30,7 @@ module YiffSpace
         other == YiffSpace.config.user_like_class || super
       end
 
-      include(YiffSpace::Utils::UserToId)
+      include(YiffSpace::User::ToId)
 
       private(:u2id)
     end

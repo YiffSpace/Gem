@@ -3,10 +3,10 @@
 require("test_helper")
 
 module YiffSpace
-  module Utils
-    class TableBuilderTest < ActiveSupport::TestCase
+  module Tables
+    class BuilderTest < ActiveSupport::TestCase
       test("row appends a custom table row") do
-        table = TableBuilder.new([]) do |t|
+        table = Builder.new([]) do |t|
           t.row(class: "spacing") do |index|
             "row #{index}"
           end
