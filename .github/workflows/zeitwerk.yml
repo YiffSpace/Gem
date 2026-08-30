@@ -10,6 +10,7 @@ on:
 jobs:
   zeitwerk:
     strategy:
+      fail-fast: false
       matrix:
         include:
           - dir: yiffspace
