@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require("singleton")
+require("active_support/core_ext/module/attribute_accessors")
 require("active_support/hash_with_indifferent_access")
 
 # This is intended to only be used externally, it is NOT reusable, do not use it within this project, or attempt to use it multiple times!!
