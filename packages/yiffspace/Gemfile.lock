@@ -42,7 +42,7 @@ PATH
 PATH
   remote: ../yiffspace-fixers
   specs:
-    yiffspace-fixers (0.0.1)
+    yiffspace-fixers (0.0.2)
       rails (>= 7.1)
       yiffspace-core (>= 0.2.0)
       zeitwerk (>= 2.6)
@@ -510,7 +510,7 @@ CHECKSUMS
   yiffspace-config (0.0.1)
   yiffspace-core (0.2.1)
   yiffspace-ext (0.0.1)
-  yiffspace-fixers (0.0.1)
+  yiffspace-fixers (0.0.2)
   yiffspace-images (0.0.1)
   yiffspace-include (0.0.1)
   yiffspace-search (0.0.1)
