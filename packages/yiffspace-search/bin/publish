@@ -55,6 +55,32 @@ def restore_working_tree!
   system("git", "checkout", "--", "lib/yiffspace/search/version.rb", "Gemfile.lock", chdir: ROOT)
 end
 
+# Sibling packages whose Gemfile references this one via a local `path:` dependency - each of
+# their lockfiles pins this package's version too, so releasing here would leave them frozen
+# against a gemspec that no longer matches unless their lockfile is refreshed in the same commit.
+def dependent_package_dirs
+  Dir.glob(File.join(File.dirname(ROOT), "*", "Gemfile")).filter_map do |gemfile|
+    dir = File.dirname(gemfile)
+    next if dir == ROOT
+    next unless File.read(gemfile).match?(/gem\(["']#{Regexp.escape(File.basename(ROOT))}["']\s*,\s*path:/)
+
+    dir
+  end.sort
+end
+
+def update_dependent_lock(dir)
+  name = File.basename(ROOT)
+  puts("+ (in #{File.basename(dir)}) bundle lock --update #{name} --conservative")
+  return false unless system("bundle", "lock", "--update", name, "--conservative", chdir: dir)
+
+  puts("+ (in #{File.basename(dir)}) BUNDLE_FROZEN=true bundle install --quiet")
+  system({ "BUNDLE_FROZEN" => "true" }, "bundle", "install", "--quiet", chdir: dir)
+end
+
+def restore_dependent_lock!(dir)
+  system("git", "checkout", "--", "Gemfile.lock", chdir: dir)
+end
+
 def capture(*cmd)
   output = IO.popen(cmd, chdir: ROOT, &:read)
   abort!("command failed: #{cmd.join(' ')}") unless $CHILD_STATUS.success?
@@ -203,7 +229,18 @@ def main(argv)
     abort!("a frozen `bundle install` fails against the updated Gemfile.lock - CI would fail the same way. Working tree restored, nothing committed.")
   end
 
-  run("git", "add", "lib/yiffspace/search/version.rb", "Gemfile.lock")
+  dependents = dependent_package_dirs
+  updated_dependents = []
+  dependents.each do |dir|
+    unless update_dependent_lock(dir)
+      restore_working_tree!
+      updated_dependents.each { |d| restore_dependent_lock!(d) }
+      abort!("a frozen `bundle install` fails in #{File.basename(dir)} against its Gemfile.lock refreshed for this release - CI would fail the same way. Working tree restored, nothing committed.")
+    end
+    updated_dependents << dir
+  end
+
+  run("git", "add", "lib/yiffspace/search/version.rb", "Gemfile.lock", *dependents.map { |dir| File.join(dir, "Gemfile.lock") })
   run("git", "commit", "-m", new_version)
   # Every existing tag is a plain lightweight tag (not annotated/signed) - force that regardless
   # of a local tag.gpgSign=true config, which would otherwise upgrade this into an annotated tag
