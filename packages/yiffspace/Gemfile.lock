@@ -8,7 +8,7 @@ PATH
 PATH
   remote: ../yiffspace-auth
   specs:
-    yiffspace-auth (0.0.5)
+    yiffspace-auth (0.0.6)
       httparty (>= 0.24)
       logto (>= 0.2.0)
       rails (>= 7.1)
@@ -506,7 +506,7 @@ CHECKSUMS
   websocket-extensions (0.1.5) sha256=1c6ba63092cda343eb53fc657110c71c754c56484aad42578495227d717a8241
   yiffspace (0.2.0)
   yiffspace-arel (0.0.1)
-  yiffspace-auth (0.0.5)
+  yiffspace-auth (0.0.6)
   yiffspace-config (0.0.1)
   yiffspace-core (0.2.0)
   yiffspace-ext (0.0.1)
