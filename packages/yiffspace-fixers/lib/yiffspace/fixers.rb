@@ -3,11 +3,6 @@
 require("yiffspace/core")
 require("zeitwerk")
 
-module YiffSpace
-  module Fixers
-  end
-end
-
 loader = Zeitwerk::Loader.for_gem_extension(YiffSpace)
 loader.ignore("#{__dir__}/fixers/engine.rb")
 loader.setup
@@ -18,6 +13,9 @@ loader.setup
 require_relative("fixers/engine") if defined?(Rails)
 
 module YiffSpace
+  module Fixers
+  end
+
   class Configuration
     # Named `--steps` presets for `bin/rails generate yiffspace:fixer`. See
     # YiffSpace::Configuration::FixerTemplates.

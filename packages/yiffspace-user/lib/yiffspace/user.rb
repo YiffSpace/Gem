@@ -3,11 +3,6 @@
 require("yiffspace/core")
 require("zeitwerk")
 
-module YiffSpace
-  module User
-  end
-end
-
 loader = Zeitwerk::Loader.for_gem_extension(YiffSpace)
 loader.ignore("#{__dir__}/user/engine.rb")
 loader.setup
@@ -17,6 +12,9 @@ loader.setup
 require_relative("user/engine") if defined?(Rails)
 
 module YiffSpace
+  module User
+  end
+
   class Configuration
     # The application's User model class. Used by User::Current, Search::QueryDSL, etc.
     # Falls back to ::User at call time when nil.
