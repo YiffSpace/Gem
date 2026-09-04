@@ -9,8 +9,10 @@ on:
 
 jobs:
   rubocop:
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.event.release.tag_name, 'yiffspace-ext-v')
     uses: ./.github/workflows/rubocop.yml
   zeitwerk:
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.event.release.tag_name, 'yiffspace-ext-v')
     uses: ./.github/workflows/zeitwerk.yml
   publish:
     if: github.event_name == 'workflow_dispatch' || startsWith(github.event.release.tag_name, 'yiffspace-ext-v')
