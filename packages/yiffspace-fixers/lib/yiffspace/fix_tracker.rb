@@ -5,10 +5,58 @@ module YiffSpace
   # db/migrate/*_create_fixes.rb) the same way ActiveRecord's own schema_migrations table
   # tracks migrations. Used by the `fixes:*` rake tasks (lib/tasks/fixes.rake).
   module FixTracker
+    # Raised by requires_migration! when the required migration hasn't been applied yet.
+    class MigrationRequired < StandardError; end
+
+    # A fix script calls this as its first statement to declare that a migration must already be
+    # applied before it can run, e.g.:
+    #
+    #   YiffSpace::FixTracker.requires_migration!("20260822004454")
+    #
+    # Written as a literal string call like that (not built dynamically) so YiffSpace::MigrationSync
+    # can also read it back out of the file with #required_migration_for, without loading/running
+    # the fix, to order `fixes:migrate_all` correctly.
+    REQUIRES_MIGRATION_PATTERN = /^\s*YiffSpace::FixTracker\.requires_migration!\(\s*["']([^"']+)["']\s*\)/
+
     module_function
 
     def fix_path(name)
       Rails.root.glob("db/fixes/#{name}.rb").first
+    end
+
+    def requires_migration!(version)
+      return if migration_applied?(version)
+
+      raise(MigrationRequired, "migration #{version} must be applied before this fix can run")
+    end
+
+    def migration_applied?(version)
+      migration_context.get_all_versions.include?(version.to_i)
+    end
+
+    # Statically reads a fix script's declared requires_migration! version, if any, without
+    # loading/running it - nil if the fix has no such call.
+    def required_migration_for(name)
+      path = fix_path(name)
+      return nil unless path
+
+      path.read.match(REQUIRES_MIGRATION_PATTERN)&.captures&.first
+    end
+
+    # Resolves a YiffSpace::Fixers::RequiresFix id_or_name to the fix name(s) it refers to - an
+    # Integer id covers every step sharing that id (e.g. 2 -> %w[2_1_first_step 2_2_second_step]),
+    # a name matches that one fix file exactly.
+    def resolve(id_or_name)
+      if id_or_name.is_a?(Integer)
+        all_fixes.select { |name| key_for(name).first == id_or_name }
+      else
+        name = id_or_name.to_s.delete_suffix(".rb")
+        all_fixes.select { |candidate| candidate == name }
+      end
+    end
+
+    def migration_context
+      ActiveRecord::Tasks::DatabaseTasks.migration_connection_pool.migration_context
     end
 
     # db/fixes filenames are "<id>_description.rb", occasionally "<id>_<index>_description.rb"

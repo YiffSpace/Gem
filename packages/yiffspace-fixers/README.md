@@ -29,7 +29,27 @@ $ bin/rails fixes:list
 $ bin/rails fixes:migrate
 ```
 
-See `YiffSpace::FixTracker` and `YiffSpace::FixerTemplate` for the full API.
+A fix can require that a migration has already been applied, and a migration can require that a
+fix has already been applied - useful when one depends on schema or data the other provides.
+`bin/rails fixes:migrate_all` runs both `db/migrate` and `db/fixes` together, in whichever order
+those requirements demand:
+
+```ruby
+# db/fixes/12_backfill_widget_type.rb
+YiffSpace::FixTracker.requires_migration!("20260822004454")
+
+# db/migrate/20260901000000_remove_legacy_widget_column.rb
+class RemoveLegacyWidgetColumn < ActiveRecord::Migration[8.1]
+  requires_fix(12)
+
+  def change
+    ...
+  end
+end
+```
+
+See `YiffSpace::FixTracker`, `YiffSpace::FixerTemplate`, `YiffSpace::Fixers::RequiresFix`, and
+`YiffSpace::MigrationSync` for the full API.
 
 ## Contributing
 

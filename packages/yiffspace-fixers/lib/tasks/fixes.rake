@@ -51,6 +51,26 @@ namespace(:fixes) do
 
     Rake::Task["db:_dump"].invoke
   end
+end
+
+# Split into its own namespace block, rather than growing the one above past
+# Metrics/BlockLength's max - Rake happily reopens a namespace.
+namespace(:fixes) do
+  desc("Apply all pending db/migrate migrations and db/fixes fixes together, in whichever order their requires_fix/requires_migration! declarations demand")
+  task(migrate_all: :environment) do
+    steps = YiffSpace::MigrationSync.plan
+
+    if steps.empty?
+      puts("Nothing to migrate or fix.")
+    else
+      steps.each do |step|
+        puts(YiffSpace::MigrationSync.describe(step))
+        YiffSpace::MigrationSync.apply(step)
+      end
+    end
+
+    Rake::Task["db:_dump"].invoke
+  end
 
   desc("Record all of the current fixes as having been applied")
   task(load: :environment) do
