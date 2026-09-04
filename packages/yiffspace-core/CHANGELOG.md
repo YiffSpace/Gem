@@ -32,6 +32,18 @@
 - The dummy test app no longer needs Postgres - only the fixes table's
   `nulls_not_distinct` index required it, and that lives in `yiffspace-fixers`
   now. Back to plain sqlite3, `docker-compose.yml` removed.
+- Fixed `YiffSpace::Utils::Helpers`/`Routes` (`Helpers`/`Routes` under
+  `yiffspace-include`) dropping keyword arguments: their `method_missing` used
+  a bare `*, &` splat, which isn't `ruby2_keywords`-aware, so a call like
+  `h.some_helper(post, tags: tags)` arrived with the `tags:` hash flattened
+  into a positional argument instead of a keyword - silently landing in
+  whatever parameter came next rather than raising. Both now use `...` to
+  forward positional, keyword, and block arguments correctly.
+- `YiffSpace::Utils::Helpers` (`Helpers`) now also makes the app's route
+  `_path`/`_url` helpers available *inside* the helper methods it proxies to,
+  not just to callers going through it directly - a helper that itself calls
+  `some_path(...)` (with no receiver) now works the same way it would from a
+  real view, instead of raising `NoMethodError`.
 
 ## 0.1.0
 

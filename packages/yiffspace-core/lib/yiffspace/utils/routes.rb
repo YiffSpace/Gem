@@ -13,9 +13,9 @@ module YiffSpace
     module Routes
       module_function
 
-      def method_missing(name, *, &)
+      def method_missing(name, ...)
         url_helpers = Rails.application.routes.url_helpers
-        return url_helpers.public_send(name, *, &) if url_helpers.respond_to?(name)
+        return url_helpers.public_send(name, ...) if url_helpers.respond_to?(name)
 
         super
       end
