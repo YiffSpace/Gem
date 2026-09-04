@@ -81,7 +81,7 @@ PATH
 PATH
   remote: ../yiffspace-user
   specs:
-    yiffspace-user (0.0.1)
+    yiffspace-user (0.0.2)
       rails (>= 7.1)
       request_store (>= 1.7)
       yiffspace-core (>= 0.2.0)
@@ -515,7 +515,7 @@ CHECKSUMS
   yiffspace-include (0.0.1)
   yiffspace-search (0.0.1)
   yiffspace-tables (0.0.2)
-  yiffspace-user (0.0.1)
+  yiffspace-user (0.0.2)
   zeitwerk (2.8.3) sha256=2c85125a8467ce069e20123d1e709a08955c9d29c118c25b46b7b7fafdbb92e5
 
 BUNDLED WITH
