@@ -3,6 +3,11 @@
 require("yiffspace/core")
 require("zeitwerk")
 
+module YiffSpace
+  module User
+  end
+end
+
 loader = Zeitwerk::Loader.for_gem_extension(YiffSpace)
 loader.ignore("#{__dir__}/user/engine.rb")
 loader.setup
