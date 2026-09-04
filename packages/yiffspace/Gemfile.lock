@@ -25,7 +25,7 @@ PATH
 PATH
   remote: ../yiffspace-core
   specs:
-    yiffspace-core (0.2.0)
+    yiffspace-core (0.2.1)
       abbrev (>= 0.1.2)
       rails (>= 8.1)
       yiffspace-ext (>= 0.0.1)
@@ -508,7 +508,7 @@ CHECKSUMS
   yiffspace-arel (0.0.1)
   yiffspace-auth (0.0.6)
   yiffspace-config (0.0.1)
-  yiffspace-core (0.2.0)
+  yiffspace-core (0.2.1)
   yiffspace-ext (0.0.1)
   yiffspace-fixers (0.0.1)
   yiffspace-images (0.0.1)
