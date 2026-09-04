@@ -8,3 +8,9 @@ load("rails/tasks/engine.rake")
 load("rails/tasks/statistics.rake")
 
 require("bundler/gem_tasks")
+
+# CI releases from an already-tagged, already-pushed commit checked out at a detached HEAD, so
+# the default release task's git tag/push step has nothing to do and fails trying to push a
+# branch ref that does not exist in that checkout.
+Rake::Task["release"].clear
+task("release" => "release:rubygem_push")
