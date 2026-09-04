@@ -18,7 +18,7 @@ PATH
 PATH
   remote: .
   specs:
-    yiffspace-tables (0.0.1)
+    yiffspace-tables (0.0.2)
       yiffspace-core (>= 0.2.0)
       zeitwerk (>= 2.6)
 
@@ -397,7 +397,7 @@ CHECKSUMS
   websocket-extensions (0.1.5) sha256=1c6ba63092cda343eb53fc657110c71c754c56484aad42578495227d717a8241
   yiffspace-core (0.2.1)
   yiffspace-ext (0.0.1)
-  yiffspace-tables (0.0.1)
+  yiffspace-tables (0.0.2)
   zeitwerk (2.8.3) sha256=2c85125a8467ce069e20123d1e709a08955c9d29c118c25b46b7b7fafdbb92e5
 
 BUNDLED WITH
