@@ -137,7 +137,11 @@ def edit_notes(tag, subjects)
     File.write(path, template)
 
     editor = capture("git", "var", "GIT_EDITOR").strip
-    system("#{editor} #{Shellwords.escape(path)}") || abort!("editor exited with a failure")
+    unless system("#{editor} #{Shellwords.escape(path)}")
+      # git falls back to `vi` when nothing is configured, which isn't always installed
+      hint = $CHILD_STATUS.exitstatus == 127 ? " - command not found, set core.editor, VISUAL, or EDITOR" : ""
+      abort!("editor #{editor.inspect} exited with a failure#{hint}")
+    end
 
     edited = File.readlines(path).reject { |line| line.start_with?("#") }.join.strip
     abort!("empty release notes, aborting") if edited.empty?
