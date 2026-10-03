@@ -198,8 +198,16 @@ def parse_version_arg!(argv)
   version
 end
 
+# gh is only needed once the release commit and tag are already pushed, so check for it up
+# front instead of failing halfway through.
+def check_gh!
+  abort!("gh isn't installed - see https://cli.github.com") unless system("gh", "--version", out: File::NULL, err: File::NULL)
+  abort!("gh isn't logged in - run `gh auth login` first") unless system("gh", "auth", "status", out: File::NULL, err: File::NULL)
+end
+
 def main(argv)
   new_version = parse_version_arg!(argv)
+  check_gh!
 
   abort!("working tree isn't clean - commit or stash first") unless capture("git", "status", "--porcelain").empty?
 
