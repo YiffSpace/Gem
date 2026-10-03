@@ -11,12 +11,14 @@ module YiffSpace
     # A fix script calls this as its first statement to declare that a migration must already be
     # applied before it can run, e.g.:
     #
-    #   YiffSpace::FixTracker.requires_migration!("20260822004454")
+    #   requires_migration!("20260822004454")
+    #
+    # (unqualified via YiffSpace::Fixers::Script, or as YiffSpace::FixTracker.requires_migration!)
     #
     # Written as a literal string call like that (not built dynamically) so YiffSpace::MigrationSync
     # can also read it back out of the file with #required_migration_for, without loading/running
     # the fix, to order `fixes:migrate_all` correctly.
-    REQUIRES_MIGRATION_PATTERN = /^\s*YiffSpace::FixTracker\.requires_migration!\(\s*["']([^"']+)["']\s*\)/
+    REQUIRES_MIGRATION_PATTERN = /^\s*(?:YiffSpace::FixTracker\.)?requires_migration!\(\s*["']([^"']+)["']\s*\)/
 
     module_function
 
@@ -108,7 +110,8 @@ module YiffSpace
 
     def run!(path)
       name = File.basename(path, ".rb")
-      load(File.expand_path(path))
+      # A fresh wrapper per fix, so any constants a script defines don't carry over to the next one.
+      load(File.expand_path(path), Module.new.include(Fixers::Script))
       record!(name)
       name
     end

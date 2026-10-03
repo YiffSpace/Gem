@@ -101,6 +101,38 @@ module YiffSpace
       path&.delete
     end
 
+    test("required_migration_for also reads an unqualified requires_migration! call") do
+      path = Rails.root.join("db/fixes/99_requires_migration_fixture.rb")
+      path.write(<<~RUBY)
+        #!/usr/bin/env ruby
+        # frozen_string_literal: true
+
+        requires_migration!("20260822004454")
+      RUBY
+
+      assert_equal("20260822004454", FixTracker.required_migration_for("99_requires_migration_fixture"))
+    ensure
+      path&.delete
+    end
+
+    test("run! lets a fix call requires_migration! unqualified") do
+      path = Rails.root.join("db/fixes/99_requires_migration_fixture.rb")
+      path.write(<<~RUBY)
+        # frozen_string_literal: true
+
+        requires_migration!("20990101000000")
+      RUBY
+
+      assert_raises(FixTracker::MigrationRequired) { FixTracker.run!(path) }
+      assert_not(FixTracker.applied?("99_requires_migration_fixture"))
+    ensure
+      path&.delete
+    end
+
+    test("requires_migration! isn't available unqualified outside of fixes") do
+      assert_not_respond_to(Object.new, :requires_migration!, true)
+    end
+
     test("required_migration_for is nil for a fix with no such call") do
       assert_nil(FixTracker.required_migration_for("1_example_fix"))
     end
