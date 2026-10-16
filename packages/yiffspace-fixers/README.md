@@ -52,7 +52,8 @@ end
 A migration can also run a fix itself with `run_fix`, inside its own transaction - skipped if the
 fix is already applied, and when the migration is rolled back. `fixes:migrate_all` leaves those
 fixes to the migration rather than running them on their own, and a fix run this way can
-`requires_migration!` the migration running it:
+`requires_migration!` the migration running it. `run_fix!` does the same, but runs the fix even if
+it's already applied:
 
 ```ruby
 class AddWidgetType < ActiveRecord::Migration[8.1]

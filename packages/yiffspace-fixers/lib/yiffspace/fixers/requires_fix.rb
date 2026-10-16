@@ -29,7 +29,7 @@ module YiffSpace
     # Each fix it covers is run and recorded the same as YiffSpace::FixTracker.run!, unless it's
     # already applied, and inside the migration's transaction. Fixes can't be undone, so it does
     # nothing when the migration is rolled back. A fix run this way can requires_migration! the
-    # migration running it.
+    # migration running it. `run_fix!` does the same, but runs fixes even if already applied.
     module RequiresFix
       # Raised when a migration runs before one of its required fixes has been applied.
       class FixRequired < StandardError; end
@@ -37,9 +37,9 @@ module YiffSpace
       # Same idea as YiffSpace::FixTracker::REQUIRES_MIGRATION_PATTERN - lets
       # YiffSpace::MigrationSync read the fixes a migration runs out of its file, so
       # `fixes:migrate_all` leaves them to the migration instead of running them on their own.
-      RUN_FIX_PATTERN = /^\s*run_fix\(\s*(?:(\d+)|["']([^"']+)["'])\s*\)/
+      RUN_FIX_PATTERN = /^\s*run_fix!?\(\s*(?:(\d+)|["']([^"']+)["'])\s*\)/
 
-      # The id_or_name of every run_fix call in a migration file.
+      # The id_or_name of every run_fix/run_fix! call in a migration file.
       def self.fixes_run_by(path)
         File.read(path).scan(RUN_FIX_PATTERN).map { |id, name| id ? id.to_i : name }
       end
@@ -70,23 +70,32 @@ module YiffSpace
 
         # id_or_name: same as requires_fix.
         def run_fix(id_or_name)
+          run_fixes(id_or_name, force: false)
+        end
+
+        # Same as run_fix, but runs fixes even if they're already applied.
+        def run_fix!(id_or_name)
+          run_fixes(id_or_name, force: true)
+        end
+
+        private
+
+        def run_fixes(id_or_name, force:)
           return if reverting?
 
           names = YiffSpace::FixTracker.resolve(id_or_name)
           raise(ArgumentError, "#{self.class.name} runs fix #{id_or_name.inspect}, which does not exist") if names.empty?
 
           names.each do |name|
-            if YiffSpace::FixTracker.applied?(name)
+            if !force && YiffSpace::FixTracker.applied?(name)
               say("#{name} already applied, skipping")
             else
-              say_with_time("run_fix(#{name.inspect})") do
+              say_with_time("run_fix#{'!' if force}(#{name.inspect})") do
                 YiffSpace::FixTracker.running_migration(version) { YiffSpace::FixTracker.run!(YiffSpace::FixTracker.fix_path(name)) }
               end
             end
           end
         end
-
-        private
 
         def check_required_fixes!
           self.class.required_fixes.each do |id_or_name|

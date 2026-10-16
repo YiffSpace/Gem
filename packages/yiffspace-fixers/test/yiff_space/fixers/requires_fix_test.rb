@@ -64,6 +64,20 @@ module YiffSpace
         assert_output(/1_example_fix already applied, skipping/) { klass.new.migrate(:up) }
       end
 
+      test("run_fix! re-runs fixes that are already applied") do
+        FixTracker.record!("1_example_fix")
+        klass = migration_class { def change = run_fix!(1) }
+
+        assert_output(/run_fix!\("1_example_fix"\)/) { klass.new.migrate(:up) }
+      end
+
+      test("run_fix! does nothing when the migration is rolled back") do
+        klass = migration_class { def change = run_fix!(1) }
+        klass.new.migrate(:down)
+
+        assert_not(FixTracker.applied?("1_example_fix"))
+      end
+
       test("run_fix does nothing when the migration is rolled back") do
         klass = migration_class { def change = run_fix(1) }
         klass.new.migrate(:down)
@@ -106,11 +120,12 @@ module YiffSpace
             def change
               run_fix(3)
               run_fix("2_1_first_step")
+              run_fix!(4)
             end
           end
         RUBY
 
-        assert_equal([3, "2_1_first_step"], RequiresFix.fixes_run_by(path))
+        assert_equal([3, "2_1_first_step", 4], RequiresFix.fixes_run_by(path))
       ensure
         path.delete if path.exist?
       end

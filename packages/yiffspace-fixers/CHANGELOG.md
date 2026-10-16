@@ -1,5 +1,6 @@
 ## Unreleased
 
+- Added `run_fix!`, the same as `run_fix` but runs fixes even if they're already applied.
 - Migrations can run fixes themselves with `run_fix(id_or_name)`, which runs and records any of
   them not yet applied, and does nothing on rollback. `fixes:migrate_all` reads these calls out
   of pending migrations and folds those fixes into the migration's step instead of scheduling
