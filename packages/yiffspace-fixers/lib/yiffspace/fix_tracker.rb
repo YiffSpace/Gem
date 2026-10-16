@@ -27,13 +27,30 @@ module YiffSpace
     end
 
     def requires_migration!(version)
-      return if migration_applied?(version)
+      return if migration_applied?(version) || migration_running?(version)
 
       raise(MigrationRequired, "migration #{version} must be applied before this fix can run")
     end
 
     def migration_applied?(version)
       migration_context.get_all_versions.include?(version.to_i)
+    end
+
+    # A migration isn't recorded as applied until it finishes, so a fix it runs with
+    # YiffSpace::Fixers::RequiresFix#run_fix is let through requires_migration! for it via this.
+    def running_migration(version)
+      running_migrations << version.to_i
+      yield
+    ensure
+      running_migrations.pop
+    end
+
+    def migration_running?(version)
+      running_migrations.include?(version.to_i)
+    end
+
+    def running_migrations
+      @running_migrations ||= []
     end
 
     # Statically reads a fix script's declared requires_migration! version, if any, without

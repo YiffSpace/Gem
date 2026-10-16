@@ -70,6 +70,52 @@ module YiffSpace
         assert_operator(keys.index([:fix, "2_2_second_step"]), :<, keys.index([:migration, @version.to_i]))
       end
 
+      test("a fix a migration runs itself gets no step of its own, and keeps its place in fix order") do
+        @migration_path.write(<<~RUBY)
+          class MigrationSyncFixture < ActiveRecord::Migration[8.1]
+            def change
+              run_fix("2_1_first_step")
+            end
+          end
+        RUBY
+
+        keys = YiffSpace::MigrationSync.plan.map(&:key)
+
+        assert_not_includes(keys, [:fix, "2_1_first_step"])
+        assert_operator(keys.index([:fix, "1_example_fix"]), :<, keys.index([:migration, @version.to_i]))
+        assert_operator(keys.index([:migration, @version.to_i]), :<, keys.index([:fix, "2_2_second_step"]))
+      end
+
+      test("a fix can require the migration that runs it") do
+        @migration_path.write(<<~RUBY)
+          class MigrationSyncFixture < ActiveRecord::Migration[8.1]
+            def change
+              run_fix(90)
+            end
+          end
+        RUBY
+        @fix_path.write(<<~RUBY)
+          requires_migration!("#{@version}")
+        RUBY
+
+        keys = YiffSpace::MigrationSync.plan.map(&:key)
+
+        assert_includes(keys, [:migration, @version.to_i])
+        assert_not_includes(keys, [:fix, "90_migration_sync_fixture_fix"])
+      end
+
+      test("a migration running a fix that doesn't exist raises UnresolvableOrder") do
+        @migration_path.write(<<~RUBY)
+          class MigrationSyncFixture < ActiveRecord::Migration[8.1]
+            def change
+              run_fix(999)
+            end
+          end
+        RUBY
+
+        assert_raises(YiffSpace::MigrationSync::UnresolvableOrder) { YiffSpace::MigrationSync.plan }
+      end
+
       test("a fix requiring a migration that doesn't exist raises UnresolvableOrder") do
         @fix_path.write(<<~RUBY)
           #!/usr/bin/env ruby

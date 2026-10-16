@@ -1,5 +1,9 @@
 ## Unreleased
 
+- Migrations can run fixes themselves with `run_fix(id_or_name)`, which runs and records any of
+  them not yet applied, and does nothing on rollback. `fixes:migrate_all` reads these calls out
+  of pending migrations and folds those fixes into the migration's step instead of scheduling
+  them separately. A fix run this way can `requires_migration!` the migration running it.
 - Fixes run through `YiffSpace::FixTracker.run!` (so every `fixes:*` task) can call
   `requires_migration!` unqualified, via `YiffSpace::Fixers::Script` - each fix is now loaded
   wrapped in its own module including it, rather than straight into the top level, so it isn't

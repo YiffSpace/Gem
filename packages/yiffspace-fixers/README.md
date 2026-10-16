@@ -49,6 +49,20 @@ class RemoveLegacyWidgetColumn < ActiveRecord::Migration[8.1]
 end
 ```
 
+A migration can also run a fix itself with `run_fix`, inside its own transaction - skipped if the
+fix is already applied, and when the migration is rolled back. `fixes:migrate_all` leaves those
+fixes to the migration rather than running them on their own, and a fix run this way can
+`requires_migration!` the migration running it:
+
+```ruby
+class AddWidgetType < ActiveRecord::Migration[8.1]
+  def change
+    add_column(:widgets, :type, :string)
+    run_fix(12)
+  end
+end
+```
+
 See `YiffSpace::FixTracker`, `YiffSpace::FixerTemplate`, `YiffSpace::Fixers::RequiresFix`, and
 `YiffSpace::MigrationSync` for the full API.
 

@@ -18,9 +18,31 @@ module YiffSpace
     # out of order), and read back ahead of time by YiffSpace::MigrationSync to order
     # `fixes:migrate_all` correctly. Included into ActiveRecord::Migration by
     # YiffSpace::Fixers::Engine.
+    #
+    # A migration can also run a fix itself, as part of migrating, with `run_fix`:
+    #
+    #   def change
+    #     add_column(:widgets, :type, :string)
+    #     run_fix(3)
+    #   end
+    #
+    # Each fix it covers is run and recorded the same as YiffSpace::FixTracker.run!, unless it's
+    # already applied, and inside the migration's transaction. Fixes can't be undone, so it does
+    # nothing when the migration is rolled back. A fix run this way can requires_migration! the
+    # migration running it.
     module RequiresFix
       # Raised when a migration runs before one of its required fixes has been applied.
       class FixRequired < StandardError; end
+
+      # Same idea as YiffSpace::FixTracker::REQUIRES_MIGRATION_PATTERN - lets
+      # YiffSpace::MigrationSync read the fixes a migration runs out of its file, so
+      # `fixes:migrate_all` leaves them to the migration instead of running them on their own.
+      RUN_FIX_PATTERN = /^\s*run_fix\(\s*(?:(\d+)|["']([^"']+)["'])\s*\)/
+
+      # The id_or_name of every run_fix call in a migration file.
+      def self.fixes_run_by(path)
+        File.read(path).scan(RUN_FIX_PATTERN).map { |id, name| id ? id.to_i : name }
+      end
 
       def self.included(base)
         base.extend(ClassMethods)
@@ -44,6 +66,24 @@ module YiffSpace
           check_required_fixes! if direction == :up
 
           super
+        end
+
+        # id_or_name: same as requires_fix.
+        def run_fix(id_or_name)
+          return if reverting?
+
+          names = YiffSpace::FixTracker.resolve(id_or_name)
+          raise(ArgumentError, "#{self.class.name} runs fix #{id_or_name.inspect}, which does not exist") if names.empty?
+
+          names.each do |name|
+            if YiffSpace::FixTracker.applied?(name)
+              say("#{name} already applied, skipping")
+            else
+              say_with_time("run_fix(#{name.inspect})") do
+                YiffSpace::FixTracker.running_migration(version) { YiffSpace::FixTracker.run!(YiffSpace::FixTracker.fix_path(name)) }
+              end
+            end
+          end
         end
 
         private

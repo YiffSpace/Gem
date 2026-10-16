@@ -4,8 +4,9 @@ module YiffSpace
   # Computes and applies pending db/migrate/*.rb migrations and db/fixes/*.rb fixes together, in
   # whichever order their cross requirements demand - a fix can require a migration
   # (YiffSpace::FixTracker.requires_migration!) and a migration can require a fix
-  # (YiffSpace::Fixers::RequiresFix#requires_fix). Migrations stay ordered among themselves by
-  # version, fixes among themselves by YiffSpace::FixTracker.sort_key, and those cross
+  # (YiffSpace::Fixers::RequiresFix#requires_fix), or run it itself (RequiresFix#run_fix).
+  # Migrations stay ordered among themselves by version, fixes among themselves by
+  # YiffSpace::FixTracker.sort_key, and those cross
   # requirements are woven in via a topological sort. #plan/#apply are used by `rake
   # fixes:migrate_all` (see lib/tasks/fixes.rake).
   module MigrationSync
@@ -24,15 +25,22 @@ module YiffSpace
     def plan
       migrations = pending_migrations
       fixes = FixTracker.pending
+      run_by = fixes_run_by(migrations)
 
       steps = {}
       migrations.each { |m| steps[[:migration, m.version]] = Step.new(:migration, m, [:migration, m.version]) }
-      fixes.each { |f| steps[[:fix, f]] = Step.new(:fix, f, [:fix, f]) }
+      fixes.each { |f| steps[[:fix, f]] = Step.new(:fix, f, [:fix, f]) unless run_by.key?([:fix, f]) }
 
       edges = Hash.new { |h, k| h[k] = [] }
       indegree = steps.each_key.index_with(0)
 
       link = lambda do |before, after|
+        # A fix a migration runs (see #fixes_run_by) has no step of its own, its requirements and
+        # ordering carry over to that migration instead. One requiring that same migration links
+        # it to itself, which needs nothing - FixTracker.running_migration covers it at runtime.
+        before = run_by.fetch(before, before)
+        after = run_by.fetch(after, after)
+        next if before == after
         next unless steps.key?(before) && steps.key?(after)
 
         edges[before] << after
@@ -66,6 +74,19 @@ module YiffSpace
           raise(UnresolvableOrder, "#{m.name} requires fix #{id_or_name.inspect}, which does not exist") if names.empty?
 
           names.each { |name| link.call([:fix, name], [:migration, m.version]) }
+        end
+      end
+    end
+
+    # Maps [:fix, name] => [:migration, version] for every pending fix a pending migration runs
+    # itself with YiffSpace::Fixers::RequiresFix#run_fix.
+    def fixes_run_by(migrations)
+      migrations.each_with_object({}) do |m, run_by|
+        Fixers::RequiresFix.fixes_run_by(m.filename).each do |id_or_name|
+          names = FixTracker.resolve(id_or_name)
+          raise(UnresolvableOrder, "#{m.name} runs fix #{id_or_name.inspect}, which does not exist") if names.empty?
+
+          names.each { |name| run_by[[:fix, name]] ||= [:migration, m.version] }
         end
       end
     end
