@@ -44,6 +44,13 @@
   not just to callers going through it directly - a helper that itself calls
   `some_path(...)` (with no receiver) now works the same way it would from a
   real view, instead of raising `NoMethodError`.
+- Fixed `parallel_find_each` exhausting the connection pool: records run on
+  concurrent-ruby's shared `:io` pool, whose threads never exit, so any plain
+  `connection` call inside the block leased a connection to that thread for
+  good. Once enough threads held one, every other record waited out the pool
+  timeout and raised `ActiveRecord::ConnectionTimeoutError`. Each record now
+  runs inside `with_connection(prevent_permanent_checkout: true)`, which
+  returns the connection when the block finishes.
 
 ## 0.1.0
 
