@@ -17,7 +17,7 @@ jobs:
   publish:
     if: github.event_name == 'workflow_dispatch' || startsWith(github.event.release.tag_name, 'yiffspace-v')
     needs: [ rubocop, zeitwerk ]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: ruby/setup-ruby@v1
